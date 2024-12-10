@@ -9,7 +9,7 @@ const ThemeToggle = () => {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <></>;
+  if (!mounted) return <button className="h-6 w-6"></button>;
 
   return (
     <button
