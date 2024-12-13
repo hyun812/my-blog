@@ -6,6 +6,7 @@ const ThemeProvider = ({ children, ...props }: ThemeProviderProps) => {
     <NextThemesProvider
       attribute="class"
       defaultTheme="system"
+      enableSystem
       {...props}
     >
       {children}
