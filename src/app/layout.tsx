@@ -18,7 +18,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <body className="mx-auto max-w-2xl">
+      <body className="mx-auto max-w-4xl px-8 lg:max-w-2xl">
         <ThemeProvider>
           <HeaderNavigation />
           <main>{children}</main>
