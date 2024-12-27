@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import type { Config } from 'tailwindcss';
 
 export default {
@@ -25,7 +26,79 @@ export default {
           900: '#171717',
         },
       },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            'h2,h3,h4': {
+              'scroll-margin-top': 'var(--scroll-mt)',
+            },
+            'hr, thead, tbody tr': { borderColor: theme('colors.basic.300') },
+            'blockquote p:first-of-type::before': false,
+            'blockquote p:last-of-type::after': false,
+            'code::before': false,
+            'code::after': false,
+          },
+        },
+        dark: {
+          css: {
+            blockquote: {
+              borderLeftColor: theme('colors.basic.700'),
+              color: theme('colors.basic.300'),
+            },
+            'hr, thead, tbody tr': { borderColor: theme('colors.basic.700') },
+            'ol li::marker, ul li::marker': {
+              color: theme('colors.basic.500'),
+            },
+          },
+        },
+      }),
     },
   },
-  plugins: [],
+  variants: { typography: ['dark'] },
+  plugins: [
+    require('@tailwindcss/typography'),
+    ({ addComponents, addUtilities }) => {
+      addComponents({
+        '.text-primary': {
+          '@apply text-basic-900 dark:text-basic-200': '',
+        },
+        '.text-secondary': {
+          '@apply text-basic-700 dark:text-basic-350': '',
+        },
+        '.text-tertiary': {
+          '@apply text-basic-600 dark:text-basic-400': '',
+        },
+        '.text-mute': {
+          '@apply text-basic-500 dark:text-basic-470': '',
+        },
+        '.bg-primary': {
+          '@apply bg-basic-50 dark:bg-basic-900': '',
+        },
+        '.bg-secondary': {
+          '@apply bg-basic-150 dark:bg-basic-800': '',
+        },
+        '.bg-tertiary': {
+          '@apply bg-basic-200 dark:bg-basic-750': '',
+        },
+        '.bg-mute': {
+          '@apply bg-basic-250 dark:bg-basic-800': '',
+        },
+      });
+      addUtilities(
+        {
+          '.no-scrollbar': {
+            /* IE and Edge */
+            '-ms-overflow-style': 'none',
+            /* Firefox */
+            'scrollbar-width': 'none',
+            /* Safari and Chrome */
+            '&::-webkit-scrollbar': {
+              display: 'none',
+            },
+          },
+        },
+        ['responsive'],
+      );
+    },
+  ],
 } satisfies Config;
