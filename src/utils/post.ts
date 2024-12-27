@@ -28,12 +28,15 @@ export const parsePost = (postPath: string): Post => {
   const file = fs.readFileSync(postPath, 'utf8');
   const { data, content } = matter(file);
 
-  const postData: PostData = {
-    title: data.title,
-    description: data.description,
-    category: data.category,
-    date: data.date,
-  };
+  const postData = data as PostData;
 
   return { data: postData, content };
+};
+
+// category와 fileName을 받아 해당 포스트 조회
+export const getPostDetail = (category: string, fileName: string) => {
+  const path = `${POSTS_PATH}/${category}/${fileName}.mdx`;
+  const post = parsePost(path);
+
+  return post;
 };
