@@ -3,6 +3,7 @@ export interface PostData {
   description: string;
   category: string;
   date: string;
+  fileName: string;
 }
 
 export interface Post {
