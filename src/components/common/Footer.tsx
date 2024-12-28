@@ -3,7 +3,7 @@ import ExternalLink from './ExternalLink';
 
 const Footer = () => {
   return (
-    <footer className="my-20 text-center text-sm">
+    <footer className="my-20 text-center text-sm border-t pt-10">
       <div className="flex-center gap-1 pb-5">
         <ExternalLink href="https://github.com/hyun812">{ICONS.GITHUB}</ExternalLink>
         <ExternalLink href="https://www.instagram.com/hyun_ili">{ICONS.INSTAGRAM}</ExternalLink>

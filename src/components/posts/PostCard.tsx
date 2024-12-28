@@ -10,7 +10,7 @@ const PostCard = ({ post }: PostCardProps) => {
 
   return (
     <Link href={`/posts/${category}/${fileName}`}>
-      <li className="border-b text-left flex flex-col py-8 gap-2 dark:border-neutral-700">
+      <li className="border-b text-left flex flex-col py-8 gap-2">
         <p className="text-sm text-neutral-400">{category}</p>
         <h2 className="text-2xl font-semibold">{title}</h2>
         <p className="text-xl">{description}</p>

@@ -19,12 +19,12 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <body className="mx-auto max-w-4xl px-8 lg:max-w-2xl">
+      <body>
         <ThemeProvider>
           <HeaderNavigation />
-          <main>{children}</main>
+          <main className="mx-auto max-w-4xl px-8 lg:max-w-2xl">{children}</main>
+          <Footer />
         </ThemeProvider>
-        <Footer />
       </body>
     </html>
   );
