@@ -1,5 +1,7 @@
-import { getPostDetail } from '@/utils/post';
+import { getPostDetail, parseContents } from '@/utils/post';
 import PostBody from './PostBody';
+import PostHeader from './PostHeader';
+import PostTableOfContent from './PostTableOfContent';
 
 interface IPostDetailProps {
   category: string;
@@ -8,13 +10,14 @@ interface IPostDetailProps {
 
 const PostDetail = async ({ category, fileName }: IPostDetailProps) => {
   const { data, content } = await getPostDetail(category, fileName);
-
-  console.log(data);
+  const tableOfContent = parseContents(content);
 
   return (
-    <>
+    <div className="h-full relative">
+      <PostHeader data={data} />
       <PostBody content={content} />
-    </>
+      <PostTableOfContent tableOfContent={tableOfContent} />
+    </div>
   );
 };
 

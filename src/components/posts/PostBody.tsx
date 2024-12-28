@@ -10,7 +10,7 @@ interface IPostDetailProps {
 }
 const PostBody = ({ content }: IPostDetailProps) => {
   return (
-    <div className="prose dark:prose-invert">
+    <div className="prose dark:prose-invert flex-1">
       <MDXRemote
         source={content}
         // components={MdxComponents}
