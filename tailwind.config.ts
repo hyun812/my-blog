@@ -29,6 +29,7 @@ export default {
       typography: (theme) => ({
         DEFAULT: {
           css: {
+            maxWidth: '100ch',
             'h2,h3,h4': {
               'scroll-margin-top': 'var(--scroll-mt)',
             },
