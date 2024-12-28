@@ -38,3 +38,13 @@
     @apply flex justify-center items-center;
   }
 }
+
+@layer utilities {
+  .dark .border,
+  .dark .border-t,
+  .dark .border-b,
+  .dark .border-l,
+  .dark .border-r {
+    @apply border-neutral-700;
+  }
+}
