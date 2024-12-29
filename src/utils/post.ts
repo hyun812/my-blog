@@ -72,3 +72,12 @@ export const parseContents = (source: string): ITableOfContent[] => {
       return nac;
     }, []);
 };
+
+// 모든 포스트 카테고리 조회
+export const getPostListCategory = (): string[] => {
+  const category = sync(`${BASE_PATH}/**/`)
+    .map((folderPaths) => path.basename(folderPaths))
+    .filter((path) => path !== 'posts');
+
+  return category;
+};
