@@ -38,6 +38,9 @@ export default {
           950: '#0e3a36',
         },
       },
+      fontFamily: {
+        pretendard: ['var(--font-pretendard)'],
+      },
       typography: (theme) => ({
         DEFAULT: {
           css: {
