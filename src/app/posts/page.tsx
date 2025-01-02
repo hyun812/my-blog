@@ -1,10 +1,10 @@
 import CategoryChips from '@/components/posts/CategoryChips';
 import PostList from '@/components/posts/PostList';
-import { getPostList, getPostListCategory } from '@/utils/post';
+import { getMDXFileList, getPostListCategory } from '@/utils/post';
 
 const PostsPage = async () => {
   const category = getPostListCategory();
-  const postList = await getPostList();
+  const postList = await getMDXFileList('posts');
 
   return (
     <>
