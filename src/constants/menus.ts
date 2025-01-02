@@ -9,15 +9,15 @@ export const menus: IMenus[] = [
     path: '/',
   },
   {
-    label: 'about',
+    label: 'About',
     path: '/about',
   },
   {
-    label: 'posts',
+    label: 'Posts',
     path: '/posts',
   },
   {
-    label: 'snippets',
+    label: 'Snippets',
     path: '/snippets',
   },
 ];

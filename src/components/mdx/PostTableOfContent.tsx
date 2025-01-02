@@ -7,7 +7,7 @@ const PostTableOfContent = ({ tableOfContent }: { tableOfContent: ITableOfConten
   const currentHeading = useCurrentHeading();
 
   return (
-    <div className="absolute top-0 left-[calc(50%+380px)] h-full w-56 hidden xl:block">
+    <aside className="absolute top-0 left-[calc(50%+380px)] h-full w-56 hidden xl:block">
       <div className="sticky top-[200px] text-sm border rounded-lg p-5">
         <p className="font-bold pb-2">목차</p>
         <ul className="w-full flex flex-col gap-1 text-neutral-400 dark:text-neutral-500">
@@ -24,7 +24,7 @@ const PostTableOfContent = ({ tableOfContent }: { tableOfContent: ITableOfConten
           ))}
         </ul>
       </div>
-    </div>
+    </aside>
   );
 };
 

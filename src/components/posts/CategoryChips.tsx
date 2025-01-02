@@ -20,7 +20,6 @@ const CategoryChips = ({ category }: { category: string[] }) => {
 
   return (
     <div className="my-10 pb-10 border-b">
-      <p className="text-xl font-bold pb-5">카테고리</p>
       <ul className="flex items-center gap-x-3 gap-y-1 flex-wrap">
         {category.map((chip) => (
           <li

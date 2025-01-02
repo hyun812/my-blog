@@ -1,15 +1,14 @@
-import { getPostDetail, parseContents } from '@/utils/post';
-import PostBody from '../mdx/PostBody';
+import { getSnippetDetail, parseContents } from '@/utils/post';
 import PostHeader from '../mdx/PostHeader';
+import PostBody from '../mdx/PostBody';
 import PostTableOfContent from '../mdx/PostTableOfContent';
 
-interface IPostDetailProps {
-  category: string;
+interface ISnippetDetailProps {
   fileName: string;
 }
 
-const PostDetail = async ({ category, fileName }: IPostDetailProps) => {
-  const { data, content } = await getPostDetail(category, fileName);
+const SnippetDetail = async ({ fileName }: ISnippetDetailProps) => {
+  const { data, content } = await getSnippetDetail(fileName);
   const tableOfContent = parseContents(content);
 
   return (
@@ -21,4 +20,4 @@ const PostDetail = async ({ category, fileName }: IPostDetailProps) => {
   );
 };
 
-export default PostDetail;
+export default SnippetDetail;
