@@ -2,11 +2,11 @@ import { Post } from '@/types/post';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-interface PostCardProps {
+interface PostItemProps {
   post: Post;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostItem = ({ post }: PostItemProps) => {
   const { title, description, category, date, fileName } = post.data;
 
   return (
@@ -28,4 +28,4 @@ const PostCard = ({ post }: PostCardProps) => {
   );
 };
 
-export default PostCard;
+export default PostItem;

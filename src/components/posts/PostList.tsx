@@ -1,7 +1,7 @@
 'use client';
 
 import { Post } from '@/types/post';
-import PostCard from './PostCard';
+import PostItem from './PostItem';
 import { useSearchParams } from 'next/navigation';
 
 const PostList = ({ postList }: { postList: Post[] }) => {
@@ -16,7 +16,7 @@ const PostList = ({ postList }: { postList: Post[] }) => {
       </p>
       <ul className="py-5">
         {newList.map((post) => (
-          <PostCard
+          <PostItem
             key={post.data.title}
             post={post}
           />
