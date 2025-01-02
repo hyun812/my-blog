@@ -1,7 +1,7 @@
 import { getPostDetail, parseContents } from '@/utils/post';
-import PostBody from './PostBody';
-import PostHeader from './PostHeader';
-import PostTableOfContent from './PostTableOfContent';
+import PostBody from '../mdx/PostBody';
+import PostHeader from '../mdx/PostHeader';
+import PostTableOfContent from '../mdx/PostTableOfContent';
 
 interface IPostDetailProps {
   category: string;
