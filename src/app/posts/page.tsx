@@ -8,6 +8,10 @@ const PostsPage = async () => {
 
   return (
     <>
+      <div className="my-10">
+        <h1 className="text-3xl font-bold pb-3">Posts</h1>
+        <p>전체 포스트 목록을 확인해보세요</p>
+      </div>
       <CategoryChips category={category} />
       <PostList postList={postList} />
     </>
