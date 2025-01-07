@@ -13,7 +13,7 @@ const Award = () => {
             >
               <div className="basis-2/5">
                 <p className="text-lg font-semibold">{award.name}</p>
-                <p className="text-sm text-neutral-500 pt-1">{award.date}</p>
+                <p className="text-sm text-basic-500 pt-1">{award.date}</p>
               </div>
               <p className="flex-1">{award.descriptions}</p>
             </li>

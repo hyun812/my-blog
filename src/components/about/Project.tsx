@@ -31,7 +31,7 @@ const Project = () => {
               </a>
               <div className="flex justify-between items-center mt-2">
                 <p className="font-semibold">{project.role}</p>
-                <p className="text-sm text-neutral-400">{project.period}</p>
+                <p className="text-sm text-basic-400">{project.period}</p>
               </div>
               <p className="text-sm mt-3">{project.skills.join(', ')}</p>
               <ul className="list-disc pl-3 pt-3 flex flex-col gap-2">

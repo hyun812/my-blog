@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    @apply bg-white text-neutral-700;
+    @apply bg-white text-basic-700;
   }
 
   :root.dark {
@@ -15,17 +15,17 @@
   }
 
   ::selection {
-    @apply bg-neutral-700/20;
+    @apply bg-basic-700/20;
   }
 
   .dark ::selection {
-    @apply bg-neutral-500/30;
+    @apply bg-basic-500/30;
   }
 }
 
 @layer components {
   .icon-hover {
-    @apply hover:bg-neutral-200/30 dark:hover:bg-neutral-700/30;
+    @apply hover:bg-basic-200/30 dark:hover:bg-basic-700/30;
   }
 
   .flex-center {
@@ -43,6 +43,6 @@
   .dark .border-b,
   .dark .border-l,
   .dark .border-r {
-    @apply border-neutral-700;
+    @apply border-basic-700;
   }
 }
