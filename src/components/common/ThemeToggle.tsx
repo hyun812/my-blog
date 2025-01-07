@@ -16,7 +16,7 @@ const ThemeToggle = () => {
     <button
       aria-label="Toggle Dark Mode"
       onClick={toggleTheme}
-      className="p-2 rounded-full"
+      className="p-2 rounded-full icon-hover"
     >
       {theme === 'dark' ? ICONS.SUN : ICONS.MOON}
     </button>

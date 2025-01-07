@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />
-          <main className="mx-auto max-w-4xl px-8 lg:max-w-2xl">{children}</main>
+          <main className="mx-auto max-w-4xl lg:max-w-2xl px-8 lg:px-0">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>
