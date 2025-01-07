@@ -11,7 +11,7 @@
   }
 
   :root.dark {
-    @apply bg-neutral-900 text-white;
+    @apply bg-dark text-white;
   }
 
   ::selection {
@@ -24,18 +24,16 @@
 }
 
 @layer components {
-  a:hover,
-  button:hover {
-    @apply bg-neutral-100;
-  }
-
-  .dark a:hover,
-  .dark button:hover {
-    @apply bg-neutral-800;
+  .icon-hover {
+    @apply hover:bg-neutral-200/30 dark:hover:bg-neutral-700/30;
   }
 
   .flex-center {
     @apply flex justify-center items-center;
+  }
+
+  .glassmorphism {
+    @apply bg-white/80 dark:bg-dark/80 backdrop-blur-sm;
   }
 }
 
