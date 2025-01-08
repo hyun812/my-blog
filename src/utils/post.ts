@@ -1,4 +1,4 @@
-import { ITableOfContent, Post, PostData } from '@/types/post';
+import { Post, PostData } from '@/types/post';
 import fs from 'fs';
 import { sync } from 'glob';
 import matter from 'gray-matter';
@@ -52,38 +52,6 @@ export const getSnippetDetail = (fileName: string) => {
   const post = parsePost(path);
 
   return post;
-};
-
-// mdx파일 목차 추출
-export const parseContents = (source: string): ITableOfContent[] => {
-  return source
-    .split('\n')
-    .filter((line) => line.match(/(^#{1,3})\s/))
-    .reduce<any>((ac, rawHeading) => {
-      const nac = [...ac];
-      const removeMdx = rawHeading
-        .replace(/^##*\s/, '')
-        .replace(/[\*,\~]{2,}/g, '')
-        .replace(/(?<=\])\((.*?)\)/g, '')
-        .replace(/(?<!\S)((http)(s?):\/\/|www\.).+?(?=\s)/g, '');
-
-      const section = {
-        slug: removeMdx
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9ㄱ-ㅎ|ㅏ-ㅣ|가-힣 -]/g, '')
-          .replace(/\s/g, '-'),
-        text: removeMdx,
-      };
-
-      const level = rawHeading.split('#').length - 1; // #의 개수를 세서 레벨을 판단
-
-      if (level <= 2) {
-        nac.push({ ...section });
-      }
-
-      return nac;
-    }, []);
 };
 
 // 모든 포스트 카테고리 조회
