@@ -13,6 +13,8 @@ export interface Post {
 }
 
 export interface ITableOfContent {
-  slug: string;
-  text: string;
+  id: string;
+  textContent: string | null;
+  level: number;
+  absoluteTop: number;
 }
