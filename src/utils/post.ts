@@ -25,6 +25,8 @@ export const getMDXFileList = async (content: ContentType) => {
   const paths = getMDXFilePaths(content);
 
   const posts = await Promise.all(paths.map((path) => parsePost(path)));
+  posts.sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date));
+
   return posts;
 };
 
@@ -46,7 +48,7 @@ export const getPostDetail = (category: string, fileName: string) => {
   return post;
 };
 
-// category와 fileName을 받아 해당 포스트 조회
+// category와 fileName을 받아 해당 snippet 조회
 export const getSnippetDetail = (fileName: string) => {
   const path = `${SNIPPET_PATH}/${fileName}.mdx`;
   const post = parsePost(path);
