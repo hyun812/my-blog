@@ -4,17 +4,20 @@ import { Post } from '@/types/post';
 import PostItem from './PostItem';
 import { useSearchParams } from 'next/navigation';
 
-const PostList = ({ postList }: { postList: Post[] }) => {
+interface IPostListProps {
+  postList: Post[];
+  children: React.ReactNode;
+}
+
+const PostList = ({ postList, children }: IPostListProps) => {
   const searchParams = useSearchParams();
   const category = searchParams.get('category');
   const newList = !category ? postList : postList.filter((item) => item.data.category === category);
 
   return (
     <div>
-      <p>
-        총 <span className="font-bold">{newList.length}</span>개의 포스트가 있어요
-      </p>
-      <ul className="py-5">
+      {children}
+      <ul className="pb-5">
         {newList.map((post) => (
           <PostItem
             key={post.data.title}

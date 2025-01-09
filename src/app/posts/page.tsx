@@ -13,7 +13,11 @@ const PostsPage = async () => {
         <p>전체 포스트 목록을 확인해보세요</p>
       </div>
       <CategoryChips category={category} />
-      <PostList postList={postList} />
+      <PostList postList={postList}>
+        <p>
+          총 <span className="font-bold">{postList.length}</span>개의 포스트가 있어요
+        </p>
+      </PostList>
     </>
   );
 };
