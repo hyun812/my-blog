@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import type { Config } from 'tailwindcss';
 
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   darkMode: ['class'],
   content: ['./src/components/**/*.{js,ts,jsx,tsx,mdx}', './src/app/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
@@ -26,17 +26,17 @@ export default {
           800: '#262626',
           900: '#171717',
         },
-        teal: {
-          100: '#e1f5eb',
-          200: '#b3e6d6',
-          300: '#80d6b4',
-          400: '#4bb997',
-          500: '#2f9c7a',
-          600: '#278f6f',
-          700: '#207a63',
-          800: '#1a654f',
-          900: '#144f44',
-          950: '#0e3a36',
+        primary: {
+          50: '#e7ebf2',
+          100: '#c5cddd',
+          200: '#9faec6',
+          300: '#7a8eaf',
+          400: '#566f98',
+          500: '#375995',
+          600: '#314e85',
+          700: '#2a426e',
+          800: '#243757',
+          900: '#252b3a',
         },
       },
       fontFamily: {
@@ -118,4 +118,4 @@ export default {
       );
     },
   ],
-} satisfies Config;
+};

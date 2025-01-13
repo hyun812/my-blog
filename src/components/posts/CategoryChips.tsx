@@ -25,7 +25,7 @@ const CategoryChips = ({ category }: { category: string[] }) => {
           <li
             key={chip}
             onClick={() => handleCategoryClick(chip)}
-            className={`px-4 py-1 rounded-full cursor-pointer border text-white ${curCategory === chip ? 'bg-teal-500  dark:bg-teal-600' : 'bg-teal-300  hover:bg-teal-500 dark:bg-teal-950 dark:hover:bg-teal-600'}`}
+            className={`px-4 py-1 rounded-full cursor-pointer border text-white ${curCategory === chip ? 'bg-primary-400  dark:bg-primary-600' : 'bg-primary-200  hover:bg-primary-400 dark:bg-primary-900 dark:hover:bg-primary-600'}`}
           >
             <p>#{chip}</p>
           </li>

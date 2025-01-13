@@ -23,11 +23,7 @@ const PostsPage = async () => {
           </DeferredComponent>
         }
       >
-        <PostList postList={postList}>
-          <p>
-            총 <span className="font-bold">{postList.length}</span>개의 포스트가 있어요
-          </p>
-        </PostList>
+        <PostList postList={postList} />
       </Suspense>
     </>
   );
