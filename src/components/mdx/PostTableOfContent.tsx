@@ -24,7 +24,7 @@ const PostTableOfContent = () => {
                 className={`py-1 ${leftPadding}`}
               >
                 <li
-                  className={` ${isCurHeading ? 'font-semibold text-basic-900 dark:text-basic-200' : 'hover:text-teal-400'}`}
+                  className={` ${isCurHeading ? 'font-semibold text-basic-900 dark:text-basic-200' : 'hover:text-primary-400'}`}
                 >
                   {textContent}
                 </li>
