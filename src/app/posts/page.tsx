@@ -1,3 +1,4 @@
+import CategorySkeleton from '@/components/common/CategorySkeleton';
 import DeferredComponent from '@/components/common/DeferredComponent';
 import PostSkeleton from '@/components/common/PostSkeleton';
 import CategoryChips from '@/components/posts/CategoryChips';
@@ -15,7 +16,9 @@ const PostsPage = async () => {
         <h1 className="text-3xl font-bold pb-3">Posts</h1>
         <p>전체 포스트 목록을 확인해보세요</p>
       </div>
-      <CategoryChips category={category} />
+      <Suspense fallback={<CategorySkeleton />}>
+        <CategoryChips category={category} />
+      </Suspense>
       <Suspense
         fallback={
           <DeferredComponent>
