@@ -2,6 +2,7 @@ import { getPostDetail } from '@/utils/post';
 import PostBody from '../mdx/PostBody';
 import PostHeader from '../mdx/PostHeader';
 import PostTableOfContent from '../mdx/PostTableOfContent';
+import { Suspense } from 'react';
 
 interface IPostDetailProps {
   category: string;
@@ -13,9 +14,11 @@ const PostDetail = async ({ category, fileName }: IPostDetailProps) => {
 
   return (
     <div className="h-full relative">
-      <PostHeader data={data} />
-      <PostBody content={content} />
-      <PostTableOfContent />
+      <Suspense>
+        <PostHeader data={data} />
+        <PostBody content={content} />
+        <PostTableOfContent />
+      </Suspense>
     </div>
   );
 };

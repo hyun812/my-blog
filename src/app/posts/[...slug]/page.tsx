@@ -1,6 +1,6 @@
 import PostDetail from '@/components/posts/PostDetail';
 
-const PostDetailPage = async ({ params }: { params: { slug: string } }) => {
+const PostDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
   const [category, fileName] = slug;
 
