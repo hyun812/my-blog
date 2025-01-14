@@ -1,7 +1,9 @@
 import Image from 'next/image';
 import ExternalLink from '../common/ExternalLink';
-import { ICONS } from '@/constants/Icons';
 import { introductions } from '@/constants/about';
+import GitHubIcon from '@/assets/icons/github.svg';
+import InstagramIcon from '@/assets/icons/instagram.svg';
+import MailIcon from '@/assets/icons/mail.svg';
 
 const Introduction = () => {
   return (
@@ -14,9 +16,15 @@ const Introduction = () => {
             </h2>
           </div>
           <div className="flex pt-3">
-            <ExternalLink href="https://github.com/hyun812">{ICONS.GITHUB}</ExternalLink>
-            <ExternalLink href="https://www.instagram.com/hyun_ili">{ICONS.INSTAGRAM}</ExternalLink>
-            <ExternalLink href="mailto:dltmdgus4802@gmail.com">{ICONS.MAIL}</ExternalLink>
+            <ExternalLink href="https://github.com/hyun812">
+              <GitHubIcon />
+            </ExternalLink>
+            <ExternalLink href="https://www.instagram.com/hyun_ili">
+              <InstagramIcon />
+            </ExternalLink>
+            <ExternalLink href="mailto:dltmdgus4802@gmail.com">
+              <MailIcon />
+            </ExternalLink>
           </div>
         </div>
         <Image

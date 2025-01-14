@@ -1,5 +1,6 @@
-import { ICONS } from '@/constants/Icons';
 import { PostData } from '@/types/post';
+import CalendarIcon from '@/assets/icons/calendar.svg';
+import ClockIcon from '@/assets/icons/clock.svg';
 
 const PostHeader = ({ data }: { data: PostData }) => {
   return (
@@ -8,11 +9,11 @@ const PostHeader = ({ data }: { data: PostData }) => {
       <h2 className="text-xl mb-4">{data.description}</h2>
       <div className="flex gap-3">
         <div className="flex items-center gap-1 text-basic-400">
-          {ICONS.CALENDAR}
+          <CalendarIcon />
           <p className="text-sm">{data.date}</p>
         </div>
         <div className="flex items-center gap-1 text-basic-400">
-          {ICONS.CLOCK}
+          <ClockIcon />
           <p className="text-sm">{data.readingTime}분 소요</p>
         </div>
       </div>

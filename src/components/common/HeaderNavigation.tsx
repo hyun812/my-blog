@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
-import { ICONS } from '@/constants/Icons';
 import { menus } from '@/constants/menus';
 import DropDownNavigation from './DropDownNavigation';
 import useDropDownNavigation from '@/hooks/useDropDownNavigation';
+import ListIcon from '@/assets/icons/list.svg';
 
 const HeaderNavigation = () => {
   const { showDropdown, toggleDropDown } = useDropDownNavigation();
@@ -32,7 +32,7 @@ const HeaderNavigation = () => {
               onClick={toggleDropDown}
               className="visible md:hidden rounded-full p-2 icon-hover"
             >
-              {ICONS.LIST}
+              <ListIcon className="w-6 h-6" />
             </button>
           </div>
         </div>

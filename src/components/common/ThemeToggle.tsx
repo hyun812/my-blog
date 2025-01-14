@@ -1,8 +1,9 @@
 'use client';
 
-import { ICONS } from '@/constants/Icons';
 import useDarkMode from '@/hooks/useDarkMode';
 import { useEffect, useState } from 'react';
+import MoonIcon from '@/assets/icons/moon.svg';
+import SunIcon from '@/assets/icons/sun.svg';
 
 const ThemeToggle = () => {
   const [mounted, setMounted] = useState(false);
@@ -18,7 +19,7 @@ const ThemeToggle = () => {
       onClick={toggleTheme}
       className="p-2 rounded-full icon-hover"
     >
-      {theme === 'dark' ? ICONS.SUN : ICONS.MOON}
+      {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
     </button>
   );
 };

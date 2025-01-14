@@ -1,7 +1,7 @@
 'use client';
-
-import { ICONS } from '@/constants/Icons';
 import { DetailedHTMLProps, HTMLAttributes, useRef, useState } from 'react';
+import CheckIcon from '@/assets/icons/check.svg';
+import ClipBoardIcon from '@/assets/icons/clip_board.svg';
 
 const CodeBlock = ({ children, ...props }: DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>) => {
   const [isCopied, setIsCopied] = useState<boolean>(false);
@@ -41,7 +41,7 @@ const CodeBlock = ({ children, ...props }: DetailedHTMLProps<HTMLAttributes<HTML
         className="absolute right-3 bottom-3 h-8 w-8 flex-center rounded-lg 
         bg-basic-700 text-basic-400 hover:text-basic-200 opacity-0 group-hover:opacity-100"
       >
-        <span>{isCopied ? ICONS.CHECK : ICONS.CLIP_BOARD}</span>
+        <span>{isCopied ? <CheckIcon /> : <ClipBoardIcon />}</span>
       </button>
     </div>
   );
