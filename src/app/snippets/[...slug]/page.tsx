@@ -1,9 +1,26 @@
 import SnippetDetail from '@/components/snippets/SnippetDetail';
+import { getSnippetDetail } from '@/utils/post';
 import { Suspense } from 'react';
 
-const SnippetDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
-  const { slug } = await params;
-  const [fileName] = slug;
+type Props = {
+  params: Promise<{ slug: string[] }>;
+};
+
+export const generateMetadata = async ({ params }: Props) => {
+  const slug = (await params).slug;
+  const fileName = slug[0];
+
+  const { data } = await getSnippetDetail(fileName);
+
+  return {
+    title: data.title,
+    description: data.description,
+  };
+};
+
+const SnippetDetailPage = async ({ params }: Props) => {
+  const slug = (await params).slug;
+  const fileName = slug[0];
 
   return (
     <Suspense>
