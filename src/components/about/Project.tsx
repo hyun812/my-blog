@@ -25,7 +25,9 @@ const Project = () => {
                 href={project.githubLink}
                 className="flex items-center mt-2"
               >
-                <h3 className={`text-xl font-semibold underline underline-offset-4  hover:text-primary-300`}>
+                <h3
+                  className={`text-xl font-semibold underline underline-offset-4  hover:text-primary-500 dark:hover:text-primary-400`}
+                >
                   {project.title}, {project.name}
                 </h3>
               </a>
