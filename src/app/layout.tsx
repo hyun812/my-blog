@@ -5,6 +5,8 @@ import ThemeProvider from '@/components/common/ThemeProvider';
 import Footer from '@/components/common/Footer';
 import localFont from 'next/font/local';
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
 export const metadata: Metadata = {
   title: {
     template: '%s - 승현이의 개발 블로그',
@@ -14,13 +16,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: 'https://my-blog-seven-xi-79.vercel.app',
+    url: baseUrl,
     title: '승현이의 개발 블로그',
     siteName: '승현이의 개발 블로그',
     description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
     images: [
       {
-        url: 'https://my-blog-seven-xi-79.vercel.app/profile.png',
+        url: `${baseUrl}/profile.png`,
         width: 1200,
         height: 630,
         alt: '승현이의 개발 블로그',
