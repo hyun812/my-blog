@@ -39,7 +39,7 @@ const CodeBlock = ({ children, ...props }: DetailedHTMLProps<HTMLAttributes<HTML
         aria-label={isCopied ? 'Copied!' : 'Copy code'}
         onClick={handleClickCopy}
         className="absolute right-3 bottom-3 h-8 w-8 flex-center rounded-lg 
-        bg-basic-700 text-basic-400 hover:text-basic-200 opacity-0 group-hover:opacity-100"
+        bg-basic-700 text-basic-400 pointerHover:hover:text-basic-200 opacity-100"
       >
         <span>{isCopied ? <CheckIcon /> : <ClipBoardIcon />}</span>
       </button>

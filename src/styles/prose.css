@@ -29,11 +29,11 @@
 
 .prose a {
   @apply text-primary break-words transition-all;
-  @apply decoration-basic-450 underline-offset-2 hover:decoration-basic-350;
+  @apply decoration-basic-450 underline-offset-2 pointerHover:hover:decoration-basic-350;
 }
 .prose a:has(strong) {
-  @apply decoration-yellow-300 decoration-wavy underline-offset-1 hover:decoration-yellow-400;
-  @apply dark:decoration-yellow-300/70 dark:hover:decoration-yellow-300/90;
+  @apply decoration-yellow-300 decoration-wavy underline-offset-1 pointerHover:hover:decoration-yellow-400;
+  @apply dark:decoration-yellow-300/70 dark:pointerHover:hover:decoration-yellow-300/90;
 }
 
 .prose code {
@@ -65,7 +65,7 @@
 .prose .anchor {
   @apply absolute -ml-10 mt-1 flex h-6 w-6 items-center justify-center opacity-0 transition-all;
   @apply rounded-md border-none no-underline ring-1 ring-basic-700/10;
-  @apply hover:shadow hover:ring-basic-700/30 dark:bg-basic-700 dark:text-basic-400;
+  @apply pointerHover:hover:shadow pointerHover:hover:ring-basic-700/30 dark:bg-basic-700 dark:text-basic-400;
 }
 
 .prose .anchor:after {

@@ -25,7 +25,7 @@
 
 @layer components {
   .icon-hover {
-    @apply hover:bg-basic-200/30 dark:hover:bg-basic-700/30;
+    @apply pointerHover:hover:bg-basic-200/30 dark:pointerHover:hover:bg-basic-700/30;
   }
 
   .flex-center {

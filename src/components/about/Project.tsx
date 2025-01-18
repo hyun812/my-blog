@@ -26,7 +26,7 @@ const Project = () => {
                 className="flex items-center mt-2"
               >
                 <h3
-                  className={`text-xl font-semibold underline underline-offset-4  hover:text-primary-500 dark:hover:text-primary-400`}
+                  className={`text-xl font-semibold underline underline-offset-4  pointerHover:hover:text-primary-500 dark:pointerHover:hover:text-primary-400`}
                 >
                   {project.title}, {project.name}
                 </h3>
