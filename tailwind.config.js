@@ -6,6 +6,11 @@ module.exports = {
   content: ['./src/components/**/*.{js,ts,jsx,tsx,mdx}', './src/app/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
+      screens: {
+        pointerHover: {
+          raw: '(hover: hover) and (pointer: fine)',
+        },
+      },
       colors: {
         dark: '#202124',
         basic: {
