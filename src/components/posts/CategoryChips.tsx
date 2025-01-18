@@ -27,7 +27,7 @@ const CategoryChips = ({ category }: { category: string[] }) => {
             onClick={() => handleCategoryClick(chip)}
             className={`px-4 py-1 rounded-full cursor-pointer border text-white ${curCategory === chip ? 'bg-primary-600  dark:bg-primary-600' : 'bg-primary-300  pointerHover:hover:bg-primary-600 dark:bg-primary-900 dark:pointerHover:hover:bg-primary-600'}`}
           >
-            <p>#{chip}</p>
+            <p># {chip}</p>
           </li>
         ))}
       </ul>
