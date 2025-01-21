@@ -12,31 +12,33 @@ const HeaderNavigation = () => {
 
   return (
     <>
-      <nav className=" w-full h-16 sticky top-0 border-b font-bold z-50">
-        <div className="max-w-4xl lg:max-w-2xl mx-auto px-6 lg:px-0 h-full flex items-center justify-between glassmorphism">
-          <Link href={menus[0].path}>{menus[0].label}</Link>
-          <div className="flex">
-            <div className="hidden md:flex">
-              {menus.slice(1).map((menu) => (
-                <Link
-                  key={menu.label}
-                  href={menu.path}
-                  className="py-2 px-4 rounded-md icon-hover"
-                >
-                  {menu.label}
-                </Link>
-              ))}
+      <nav className="w-full h-16 sticky top-0 border-b font-bold z-50">
+        <div className="w-full h-full glassmorphism">
+          <div className="max-w-4xl lg:max-w-2xl mx-auto px-6 lg:px-0 h-full flex items-center justify-between">
+            <Link href={menus[0].path}>{menus[0].label}</Link>
+            <div className="flex">
+              <div className="hidden md:flex">
+                {menus.slice(1).map((menu) => (
+                  <Link
+                    key={menu.label}
+                    href={menu.path}
+                    className="py-2 px-4 rounded-md icon-hover"
+                  >
+                    {menu.label}
+                  </Link>
+                ))}
+              </div>
+              <ThemeToggle />
+              <button
+                onClick={toggleDropDown}
+                className="visible md:hidden rounded-full p-2 icon-hover"
+              >
+                <ListIcon className="w-6 h-6" />
+              </button>
             </div>
-            <ThemeToggle />
-            <button
-              onClick={toggleDropDown}
-              className="visible md:hidden rounded-full p-2 icon-hover"
-            >
-              <ListIcon className="w-6 h-6" />
-            </button>
           </div>
+          {showDropdown && <DropDownNavigation />}
         </div>
-        {showDropdown && <DropDownNavigation />}
       </nav>
     </>
   );
