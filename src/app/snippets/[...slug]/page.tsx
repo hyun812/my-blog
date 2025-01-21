@@ -1,3 +1,4 @@
+import PostDetailSkeleton from '@/components/common/PostDetailSkeleton';
 import SnippetDetail from '@/components/snippets/SnippetDetail';
 import { getSnippetDetail } from '@/utils/post';
 import { Suspense } from 'react';
@@ -23,7 +24,7 @@ const SnippetDetailPage = async ({ params }: Props) => {
   const fileName = slug[0];
 
   return (
-    <Suspense>
+    <Suspense fallback={<PostDetailSkeleton />}>
       <SnippetDetail fileName={fileName}></SnippetDetail>;
     </Suspense>
   );

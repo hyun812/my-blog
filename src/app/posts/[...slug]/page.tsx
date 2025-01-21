@@ -1,10 +1,19 @@
+import PostDetailSkeleton from '@/components/common/PostDetailSkeleton';
 import PostDetail from '@/components/posts/PostDetail';
-import { getPostDetail } from '@/utils/post';
+import { getMDXFileList, getPostDetail } from '@/utils/post';
 import { Suspense } from 'react';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
+
+export async function generateStaticParams() {
+  const postList = await getMDXFileList('posts');
+
+  return postList.map((post) => ({
+    slug: [post.data.category, post.data.fileName],
+  }));
+}
 
 export const generateMetadata = async ({ params }: Props) => {
   const slug = (await params).slug;
@@ -23,7 +32,7 @@ const PostDetailPage = async ({ params }: Props) => {
   const [category, fileName] = slug;
 
   return (
-    <Suspense>
+    <Suspense fallback={<PostDetailSkeleton />}>
       <PostDetail
         category={category}
         fileName={fileName}

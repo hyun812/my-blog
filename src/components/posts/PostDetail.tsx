@@ -1,7 +1,8 @@
-import { getPostDetail } from '@/utils/post';
+import { getAdjacentPosts, getPostDetail } from '@/utils/post';
 import PostBody from '../mdx/PostBody';
 import PostHeader from '../mdx/PostHeader';
 import PostTableOfContent from '../mdx/PostTableOfContent';
+import PostNavigation from './PostNavigation';
 
 interface IPostDetailProps {
   category: string;
@@ -9,14 +10,17 @@ interface IPostDetailProps {
 }
 
 const PostDetail = async ({ category, fileName }: IPostDetailProps) => {
-  const { data, content } = await getPostDetail(category, fileName);
+  const [post, adjacent] = await Promise.all([getPostDetail(category, fileName), getAdjacentPosts(fileName)]);
 
   return (
-    <div className="h-full relative">
-      <PostHeader data={data} />
-      <PostBody content={content} />
-      <PostTableOfContent />
-    </div>
+    <>
+      <article className="h-full relative">
+        <PostHeader data={post.data} />
+        <PostBody content={post.content} />
+        <PostTableOfContent />
+      </article>
+      <PostNavigation adjacent={adjacent} />
+    </>
   );
 };
 
