@@ -37,8 +37,8 @@ const HeaderNavigation = () => {
               </button>
             </div>
           </div>
-          {showDropdown && <DropDownNavigation />}
         </div>
+        {showDropdown && <DropDownNavigation />}
       </nav>
     </>
   );
