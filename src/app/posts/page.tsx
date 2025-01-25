@@ -1,10 +1,9 @@
-import CategorySkeleton from '@/components/common/CategorySkeleton';
-import DeferredComponent from '@/components/common/DeferredComponent';
-import PostSkeleton from '@/components/common/PostSkeleton';
 import CategoryChips from '@/components/posts/CategoryChips';
 import PostList from '@/components/posts/PostList';
 import { getMDXFileList, getPostListCategory } from '@/utils/post';
 import { Suspense } from 'react';
+import PostSkeleton from '@/components/common/PostSkeleton';
+import CategorySkeleton from '@/components/common/CategorySkeleton';
 
 const PostsPage = async () => {
   const category = getPostListCategory();
@@ -19,13 +18,7 @@ const PostsPage = async () => {
       <Suspense fallback={<CategorySkeleton />}>
         <CategoryChips category={category} />
       </Suspense>
-      <Suspense
-        fallback={
-          <DeferredComponent>
-            <PostSkeleton />
-          </DeferredComponent>
-        }
-      >
+      <Suspense fallback={<PostSkeleton />}>
         <PostList postList={postList} />
       </Suspense>
     </>

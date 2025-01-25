@@ -1,11 +1,17 @@
-import PostDetailSkeleton from '@/components/common/PostDetailSkeleton';
 import SnippetDetail from '@/components/snippets/SnippetDetail';
-import { getSnippetDetail } from '@/utils/post';
-import { Suspense } from 'react';
+import { getMDXFileList, getSnippetDetail } from '@/utils/post';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
+
+export async function generateStaticParams() {
+  const snippetList = await getMDXFileList('snippets');
+
+  return snippetList.map((snippet) => ({
+    slug: [snippet.data.fileName],
+  }));
+}
 
 export const generateMetadata = async ({ params }: Props) => {
   const slug = (await params).slug;
@@ -23,11 +29,7 @@ const SnippetDetailPage = async ({ params }: Props) => {
   const slug = (await params).slug;
   const fileName = slug[0];
 
-  return (
-    <Suspense fallback={<PostDetailSkeleton />}>
-      <SnippetDetail fileName={fileName}></SnippetDetail>;
-    </Suspense>
-  );
+  return <SnippetDetail fileName={fileName}></SnippetDetail>;
 };
 
 export default SnippetDetailPage;

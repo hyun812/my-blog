@@ -74,6 +74,17 @@ export const getAdjacentPosts = cache(async (fileName: string) => {
   };
 });
 
+// 이전/다음 스니펫 조회
+export const getAdjacentSnippets = cache(async (fileName: string) => {
+  const snippets = await getMDXFileList('snippets');
+  const currentIndex = snippets.findIndex((post) => post.data.fileName === fileName);
+
+  return {
+    prevPost: currentIndex > 0 ? snippets[currentIndex - 1] : snippets[snippets.length - 1],
+    nextPost: currentIndex < snippets.length - 1 ? snippets[currentIndex + 1] : snippets[0],
+  };
+});
+
 // category와 fileName을 받아 해당 포스트 조회
 export const getPostDetail = cache((category: string, fileName: string) => {
   const path = `${BASE_PATHS.posts}/${category}/${fileName}.mdx`;

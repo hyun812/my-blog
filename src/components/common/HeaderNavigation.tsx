@@ -30,6 +30,7 @@ const HeaderNavigation = () => {
               </div>
               <ThemeToggle />
               <button
+                aria-label={showDropdown ? 'Close menu' : 'Open menu'}
                 onClick={toggleDropDown}
                 className="visible md:hidden rounded-full p-2 icon-hover"
               >

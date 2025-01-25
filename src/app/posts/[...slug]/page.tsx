@@ -1,7 +1,5 @@
-import PostDetailSkeleton from '@/components/common/PostDetailSkeleton';
 import PostDetail from '@/components/posts/PostDetail';
 import { getMDXFileList, getPostDetail } from '@/utils/post';
-import { Suspense } from 'react';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -32,12 +30,10 @@ const PostDetailPage = async ({ params }: Props) => {
   const [category, fileName] = slug;
 
   return (
-    <Suspense fallback={<PostDetailSkeleton />}>
-      <PostDetail
-        category={category}
-        fileName={fileName}
-      ></PostDetail>
-    </Suspense>
+    <PostDetail
+      category={category}
+      fileName={fileName}
+    ></PostDetail>
   );
 };
 
