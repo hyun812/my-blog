@@ -1,21 +1,29 @@
-import { getSnippetDetail } from '@/utils/post';
+import { getAdjacentSnippets, getSnippetDetail } from '@/utils/post';
 import PostHeader from '../mdx/PostHeader';
 import PostBody from '../mdx/PostBody';
 import PostTableOfContent from '../mdx/PostTableOfContent';
+import PostNavigation from '../posts/PostNavigation';
+import Giscus from '../posts/Giscus';
 
 interface ISnippetDetailProps {
   fileName: string;
 }
 
 const SnippetDetail = async ({ fileName }: ISnippetDetailProps) => {
-  const { data, content } = await getSnippetDetail(fileName);
+  const [snippet, adjacent] = await Promise.all([getSnippetDetail(fileName), getAdjacentSnippets(fileName)]);
 
   return (
-    <div className="h-full relative">
-      <PostHeader data={data} />
-      <PostBody content={content} />
-      <PostTableOfContent />
-    </div>
+    <>
+      <article className="h-full relative">
+        <PostHeader data={snippet.data} />
+        <PostBody content={snippet.content} />
+        <PostTableOfContent />
+      </article>
+      <section>
+        <PostNavigation adjacent={adjacent} />
+        <Giscus />
+      </section>
+    </>
   );
 };
 
