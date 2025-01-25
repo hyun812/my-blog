@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import '@/styles/globals.css';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import HeaderNavigation from '@/components/common/HeaderNavigation';
 import ThemeProvider from '@/components/common/ThemeProvider';
 import Footer from '@/components/common/Footer';
@@ -38,6 +39,8 @@ const pretendard = localFont({
   variable: '--font-pretendard',
 });
 
+const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -52,6 +55,7 @@ export default function RootLayout({
         <ThemeProvider>
           <HeaderNavigation />
           <main className="mx-auto max-w-4xl lg:max-w-2xl px-6 lg:px-0">{children}</main>
+          {gaId && <GoogleAnalytics gaId={gaId} />}
           <Footer />
         </ThemeProvider>
       </body>
