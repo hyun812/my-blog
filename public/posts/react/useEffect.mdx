@@ -1,0 +1,301 @@
+---
+title: '😳useEffect 정말 필요한 곳에서만 쓰고 있었나요?'
+description: 난 useEffect를 제대로 사용하고 있었을까..?
+category: React
+tags:
+  - 프론트엔드
+  - useEffect
+  - 회고
+date: '2024.12.30'
+fileName: 'useEffect'
+readingTime: 10
+---
+
+# 글을 시작하며
+
+React의 `useEffect`는 `Side Effect`를 처리하는 강력한 훅입니다. 하지만 무분별한 `useEffect` 사용은 **불필요한 렌더링, 성능 저하, 의도치 않은 오류, 가독성 저하** 등을 초래할 수 있습니다.
+이번 글에서는 `useEffect`에 대해 명확히 이해하고, 올바르게 활용할 수 있는 방법을 알아보려 합니다.
+
+# 왜 useEffect라고 이름을 지었을까?
+
+[리엑트 공식문서](https://react.dev/reference/react/useEffect)에 의하면 useEffect는 외부 시스템과 컴포넌트를 동기화 할 수 있도록 돕는 훅이라고 설명하고 있습니다.
+여기서 말하는 **외부 시스템**이란 컴포넌트 외부에서 발생하는 모든 것을 의미하며 대표적으로 다음과 같은 작업들이 있습니다.
+
+- 네트워크 요청 (API 호출)
+- 타이머 함수 (setTimeout, setInterval)
+- 직접적인 DOM 조작
+
+컴포넌트 내부에서 상태(state)나 속성(props)의 변화가 발생할 때, React는 이를 감지하고 렌더링을 수행합니다.
+하지만 네트워크 요청이나 타이머 함수와 같은 작업들은 렌더링과 직접적인 관련이 없으며, 이를 적절히 분리하지 않으면 불필요한 렌더링, 성능 저하 등이 발생할 수 있습니다.
+
+즉, 렌더링과 무관한 작업 `Side Effect`를 관리하기 위해 React는 `useEffect` 훅을 제공합니다.
+
+## 그래서 useEffect는?
+
+여기서 `Effect`는 부수효과를 의미합니다. 즉, UI 업테이트 과정과 별개로 발생해야 하는 작업을 다루며 `useEffect`는 다음과 같은 특징을 가집니다.
+
+- 렌더링된 이후 실행: 컴포넌트가 화면에 그려진 후 실행
+
+- 특정 조건에 따라 실행: 의존성 배열(dependency array)을 활용하여 특정 조건에 의해 실행
+
+- 컴포넌트의 순수성을 유지: React 컴포넌트는 순수 함수로 동작하는 것이 이상적이므로, useEffect를 활용해 렌더링과 무관한 작업을 분리할 수 있습니다.
+
+> 즉, useEffect는 렌더링과 무관한 작업(부수 효과)를 처리하기 위한 훅
+
+# useEffect가 필요하지 않을 수 있다
+
+## props, state 변경에 따라 또 다른 state를 업데이트 해야할 때
+
+- 기존 props나 state에서 계산할 수 있다면 state에 넣지말고 렌더링 중에 계산
+
+```javascript
+function Form() {
+  const [firstName, setFirstName] = useState('Taylor');
+  const [lastName, setLastName] = useState('Swift');
+
+  // 🔴 중복된 state 및 불필요한 Effect
+  const [fullName, setFullName] = useState('');
+  useEffect(() => {
+    setFullName(firstName + ' ' + lastName);
+  }, [firstName, lastName]);
+  // ...
+}
+```
+
+```javascript
+function Form() {
+  const [firstName, setFirstName] = useState('Taylor');
+  const [lastName, setLastName] = useState('Swift');
+  // ✅ 렌더링 중에 계산됨
+  const fullName = firstName + ' ' + lastName;
+  // ...
+}
+```
+
+## props 변경에 따라 데이터를 수정해야 하는 경우
+
+- 불필요한 리렌더링을 발생시킴
+
+```javascript
+function TodoList({ todos, filter }) {
+  const [newTodo, setNewTodo] = useState('');
+
+  // 🔴 중복된 state 및 불필요한 효과
+  const [visibleTodos, setVisibleTodos] = useState([]);
+  useEffect(() => {
+    setVisibleTodos(getFilteredTodos(todos, filter));
+  }, [todos, filter]);
+
+  // ...
+}
+```
+
+- 컴포넌트가 리렌더링 될 때마다 visibleTodos가 업데이트 되기 때문에 최신 ui를 보장
+
+```javascript
+function TodoList({ todos, filter }) {
+  const [newTodo, setNewTodo] = useState('');
+  // ✅ getFilteredTodos()가 느리지 않다면 괜찮습니다.
+  const visibleTodos = getFilteredTodos(todos, filter);
+  // ...
+}
+```
+
+- 복잡한 연산이라면 `useMemo` 활용
+
+```javascript
+import { useMemo, useState } from 'react';
+
+function TodoList({ todos, filter }) {
+  const [newTodo, setNewTodo] = useState('');
+  // ✅ todos나 filter가 변경되지 않는 한 getFilteredTodos()를 다시 실행하지 않습니다.
+  const visibleTodos = useMemo(() => getFilteredTodos(todos, filter), [todos, filter]);
+  // ...
+}
+```
+
+## props 변경에 따라 상태가 초기화되어야 하는 경우
+
+- userId 변경 => 리렌더링 => comment 변경 => 리렌더링
+
+```javascript
+export default function ProfilePage({ userId }) {
+  const [comment, setComment] = useState('');
+
+  // 🔴 Effect에서 prop 변경 시 state 초기화
+  useEffect(() => {
+    setComment('');
+  }, [userId]);
+  // ...
+}
+```
+
+- userId 변경 시 key 값이 변경되기 때문에 comment를 리셋할 필요가 없음
+
+- 명시적인 key를 전달하여 각 사용자의 프로필이 개념적으로 다른 프로필임을 알릴 수 있음
+
+- key값인 userId가 변경될 때마다 React는 새로운 DOM을 다시 생성하고 state를 재설정함
+
+```javascript
+export default function ProfilePage({ userId }) {
+  return (
+    <Profile
+      userId={userId}
+      key={userId}
+    />
+  );
+}
+
+function Profile({ userId }) {
+  // ✅ 이 state 및 아래의 다른 state는 key 변경 시 자동으로 재설정됩니다.
+  const [comment, setComment] = useState('');
+  // ...
+}
+```
+
+## prop이 변경에 따라 일부 상태만 조정해야하는 경우
+
+- items가 변경 => 리렌더링 => selection 변경 => 리렌더링
+
+```javascript
+function List({ items }) {
+  const [isReverse, setIsReverse] = useState(false);
+  const [selection, setSelection] = useState(null);
+
+  // 🔴 Effect에서 prop 변경 시 state 조정하기
+  useEffect(() => {
+    setSelection(null);
+  }, [items]);
+  // ...
+}
+```
+
+- 렌더링을 줄일 수는 있지만 데이터 흐름을 이해하고 디버깅 하기에는 더 어려워짐
+
+```javascript
+function List({ items }) {
+  const [isReverse, setIsReverse] = useState(false);
+  const [selection, setSelection] = useState(null);
+
+  // 렌더링 중 state 조정
+  const [prevItems, setPrevItems] = useState(items);
+  if (items !== prevItems) {
+    setPrevItems(items);
+    setSelection(null);
+  }
+  // ...
+}
+```
+
+- item을 저장하는 것이 아닌 id를 저장함으로써 해결
+
+```javascript
+function List({ items }) {
+  const [isReverse, setIsReverse] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  // ✅ 렌더링 중에 모든 것을 계산
+  const selection = items.find((item) => item.id === selectedId) ?? null;
+  // ...
+}
+```
+
+## 연쇄적으로 state를 조정해야하는 경우
+
+- setCard => 리렌더링 => setGoldCardCount => 리렌더링 => setRound => 리렌더링 => setIsGameOver => 리렌더링
+
+- 매우 비효율적이고 새로운 요구사항에 대처하기도 힘듬
+
+```javascript
+function Game() {
+  const [card, setCard] = useState(null);
+  const [goldCardCount, setGoldCardCount] = useState(0);
+  const [round, setRound] = useState(1);
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  // 🔴 서로를 트리거하기 위해서만 state를 조정하는 Effect 체인
+  useEffect(() => {
+    if (card !== null && card.gold) {
+      setGoldCardCount((c) => c + 1);
+    }
+  }, [card]);
+
+  useEffect(() => {
+    if (goldCardCount > 3) {
+      setRound((r) => r + 1);
+      setGoldCardCount(0);
+    }
+  }, [goldCardCount]);
+
+  useEffect(() => {
+    if (round > 5) {
+      setIsGameOver(true);
+    }
+  }, [round]);
+
+  useEffect(() => {
+    alert('Good game!');
+  }, [isGameOver]);
+
+  function handlePlaceCard(nextCard) {
+    if (isGameOver) {
+      throw Error('Game already ended.');
+    } else {
+      setCard(nextCard);
+    }
+  }
+}
+```
+
+- 렌더링 중에 계산 가능한 상태는 분리
+
+```javascript
+function Game() {
+  const [card, setCard] = useState(null);
+  const [goldCardCount, setGoldCardCount] = useState(0);
+  const [round, setRound] = useState(1);
+
+  // ✅ 렌더링 중에 가능한 것을 계산합니다.
+  const isGameOver = round > 5;
+
+  function handlePlaceCard(nextCard) {
+    if (isGameOver) {
+      throw Error('Game already ended.');
+    }
+
+    // ✅ 이벤트 핸들러에서 다음 state를 모두 계산합니다.
+    setCard(nextCard);
+    if (nextCard.gold) {
+      if (goldCardCount <= 3) {
+        setGoldCardCount(goldCardCount + 1);
+      } else {
+        setGoldCardCount(0);
+        setRound(round + 1);
+        if (round === 5) {
+          alert('Good game!');
+        }
+      }
+    }
+  }
+}
+```
+
+# 결론
+
+- 렌더링 중에 바로 계산할 수 있다면 `useEffect`가 필요하지 않을 수 있습니다.
+
+- `useEffect` 안에서 **사용하는 모든 변수들은 의존성 배열에 추가**하는 것이 의도치 않은 오류를 방지 할 수 있습니다.
+
+- 조건부로 `useEffect` 를 활용해야 한다면 함수 초기에 바로 return 하도록 구현해야 합니다.
+
+- useEffect, eventHandler 둘 중 어디에 코드를 작성해야할지 모르겠다면 코드가 실행되어야 하는 이유에 생각봐야 합니다.
+  (우리의 코드가 상태를 변경했을 때 실행하는 것이 의도인지, 유저의 이벤트에 따라 UI를 변경하는 것이 주 목적인지)
+
+  - `useEffect`는 컴포넌트가 렌더링되는 시점에 실행되어야 하는 코드
+
+  - `eventHandler`는 사용자가 한 행동(상호작용)에 의해 실행되어야 하는 코드
+
+- `useLayoutEffect`는 브라우저가 화면을 그리기 전에 동기적으로 실행되어 DOM에 영향을 주는 코드가 있다면 유용할 수 있습니다.
+
+- 비용이 많이 드는 작업은 'useEffect'대신 `useMemo`를 사용하세요.
+
+[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
