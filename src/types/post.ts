@@ -2,6 +2,8 @@ export interface PostData {
   title: string;
   description: string;
   category: string;
+  emoji: string;
+  tags: string[];
   date: string;
   fileName: string;
   readingTime: number;

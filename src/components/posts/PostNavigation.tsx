@@ -15,7 +15,7 @@ const PostNavigation = ({ adjacent }: PostNavigationProps) => {
 
   return (
     <>
-      <div className="w-full flex flex-col sm:flex-row justify-between gap-5 my-24">
+      <div className="w-full flex flex-col sm:flex-row justify-between gap-5 my-16">
         <Link
           className="flex items-center flex-1 gap-3 border p-2 px-5 rounded-md icon-hover transition-colors"
           href={`/posts/${prevPost.data.category}/${prevPost.data.fileName}`}

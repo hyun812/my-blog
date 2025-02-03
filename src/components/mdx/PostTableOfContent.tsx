@@ -17,7 +17,7 @@ const PostTableOfContent = () => {
   );
 
   return (
-    <aside className="absolute top-0 left-[calc(50%+380px)] h-full w-56 hidden lg:block">
+    <aside className="absolute top-0 left-[calc(50%+380px)] h-full w-60 hidden lg:block">
       <nav
         aria-label="Table of contents"
         className="sticky top-[130px] text-sm border-l p-5"
