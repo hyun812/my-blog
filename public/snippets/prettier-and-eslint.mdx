@@ -1,0 +1,164 @@
+---
+title: 'Airbnb ESLint & Prettier 적용하기'
+description: 'ESLint & Prettier 적용으로 코드의 일관성 유지하기'
+tags:
+  - React
+  - Key prop
+  - Virtual DOM
+  - 재조정
+date: '2024.11.10'
+fileName: 'prettier-and-eslint'
+readingTime: 10
+---
+
+# 글을 시작하며
+
+개발에서 가장 중요한 요소 중 하나는 바로 **코드의 일관성**입니다. 여러 개발자가 함께 작업하는 프로젝트에서는 코드 스타일의 차이로 인해 협업이 어려워질 수 있습니다.
+ESLint와 Prettier 설정을 통해 코드의 일관성을 유지하고, 코드 품질을 향상시켜 보세요.
+
+# Airbnb 스타일 EsLint 설정
+
+ESLint는 코드의 문법적 오류와 품질을 검사하고 잠재적인 버그를 예방하기 위해 사용하는 정적 분석 도구입니다.
+
+**1. eslint-config-airbnb 를 설치하기 위해 필요한 peerDependencies를 설치합니다.**
+
+```
+npm install --save-dev eslint eslint-config-airbnb eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react eslint-plugin-react-hooks
+```
+
+- eslint-config-airbnb: Airbnb의 JavaScript 스타일 가이드
+- eslint-plugin-import: ES6+ import/export 구문 검사
+- eslint-plugin-jsx-a11y: JSX의 접근성 규칙
+- eslint-plugin-react: React 관련 규칙
+- eslint-plugin-react-hooks: React Hooks 규칙
+
+`npm info "eslint-config-airbnb@latest" peerDependencies` 명령어로 필요한 peerDependencies를 확인할 수 있습니다.
+
+**2. 타입스크립트를 위한 설정을 추가합니다.**
+
+```
+npm install --save-dev @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-airbnb-typescript
+```
+
+- eslint-config-airbnb-typescript: Airbnb TypeScript 설정
+- @typescript-eslint/eslint-plugin: TypeScript 관련 린팅 규칙
+- @typescript-eslint/parser: TypeScript 코드 파싱을 위한 파서
+
+**3. prettier와 함께 사용하기 위한 설정을 추가합니다.**
+
+```
+npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
+```
+
+- eslint-config-prettier: ESLint와 Prettier 충돌 방지를 위한 설정
+- eslint-plugin-prettier: Prettier를 ESLint 규칙으로 실행하는 플러그인
+
+**4. .eslintrc.json 작성**
+
+```json
+// .eslintrc.json
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": ["tsconfig.json"]
+  },
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "plugins": ["@typescript-eslint", "react", "prettier", "import"],
+  "rules": {
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "import/no-cycle": "off",
+    "import/prefer-default-export": "off",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
+```
+
+**설정 항목 설명**
+
+**1. 기본 환경 설정**
+
+- root: true: 현재 디렉토리를 ESLint 설정의 루트로 지정
+- env: 브라우저 환경과 ES6 문법 사용을 활성화
+
+**2. 파서 설정**
+
+- parser: "@typescript-eslint/parser": TypeScript 코드 파싱을 위한 설정
+- parserOptions: 최신 JavaScript 문법과 모듈 시스템 사용 설정
+
+**3. 규칙 설정 (rules)**
+
+- react/jsx-props-no-spreading: JSX에서 props spreading 허용
+- react/require-default-props: defaultProps를 강제하지 않도록 설정
+- @typescript-eslint/naming-convention: 변수, 함수 등의 이름 규칙을 강제하지 않음
+- @typescript-eslint/no-explicit-any: any 타입 사용 허용
+- import/no-cycle: 순환 의존성 허용
+- import/prefer-default-export: default export를 강제하지 않음
+- prettier/prettier: Prettier 규칙 위반 시 오류 발생
+
+**4. 설정 (settings)**
+
+- React 버전을 자동으로 감지
+
+# Prettier 설정
+
+Prettier는 코드 포맷팅을 자동화하여 일관된 코드 스타일을 유지하도록 돕습니다.
+
+```json
+{
+  "endOfLine": "auto",
+  "singleQuote": true,
+  "semi": true,
+  "useTabs": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "printWidth": 120,
+  "arrowParens": "always",
+  "singleAttributePerLine": true
+}
+```
+
+**설정 항목 설명**
+
+- endOfLine: 운영체제에 따라 자동으로 줄바꿈 적용
+- singleQuote: 문자열을 작성 시 작은 따옴표 사용
+- semi: 문장 끝에 세미콜론 추가
+- useTabs: 탭 대신 스페이스 사용
+- tabWidth: 들여쓰기 2칸 설정
+- trailingComma: 마지막 항목에 항상 쉼표 추가 (배열, 객체 등)
+- arrowParens: 화살표 함수의 매개변수에 항상 괄호 사용
+- printWidth: 한 줄의 최대 길이를 120자로 제한
+- singleAttributePerLine: JSX에서 각 속성을 하나 씩 개행하여 작성
+
+<br />
+
+> ESLint와 Prettier의 파일 작성 부분에서는 본인의 코드 스타일에 맞게 유연하게 규칙을 추가하고 수정하면 됩니다.
