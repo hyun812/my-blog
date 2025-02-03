@@ -16,7 +16,7 @@ const MdxComponents = {
 
 const PostBody = ({ content }: IPostDetailProps) => {
   return (
-    <div className="prose dark:prose-invert flex-1 border-b">
+    <div className="prose dark:prose-invert flex-1">
       <MDXRemote
         source={content}
         components={MdxComponents}
