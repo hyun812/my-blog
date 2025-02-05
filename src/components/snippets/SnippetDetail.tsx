@@ -4,6 +4,7 @@ import PostBody from '../mdx/PostBody';
 import PostTableOfContent from '../mdx/PostTableOfContent';
 import PostNavigation from '../posts/PostNavigation';
 import Giscus from '../posts/Giscus';
+import Tags from '../posts/Tags';
 
 interface ISnippetDetailProps {
   fileName: string;
@@ -14,10 +15,11 @@ const SnippetDetail = async ({ fileName }: ISnippetDetailProps) => {
 
   return (
     <>
-      <article className="h-full relative">
+      <article className="h-full relative border-b pb-8">
         <PostHeader data={snippet.data} />
         <PostBody content={snippet.content} />
         <PostTableOfContent />
+        <Tags tags={snippet.data.tags} />
       </article>
       <section>
         <PostNavigation adjacent={adjacent} />

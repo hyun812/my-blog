@@ -5,6 +5,8 @@ type Props = {
   params: Promise<{ slug: string[] }>;
 };
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
 export async function generateStaticParams() {
   const snippetList = await getMDXFileList('snippets');
 
@@ -22,6 +24,14 @@ export const generateMetadata = async ({ params }: Props) => {
   return {
     title: data.title,
     description: data.description,
+    keywords: data.tags.join(', '),
+    openGraph: {
+      type: 'article',
+      title: data.title,
+      description: data.description,
+      url: `${baseUrl}/snippets/${fileName}`,
+      tags: data.tags,
+    },
   };
 };
 

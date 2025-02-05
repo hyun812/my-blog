@@ -5,6 +5,7 @@ import HeaderNavigation from '@/components/common/HeaderNavigation';
 import ThemeProvider from '@/components/common/ThemeProvider';
 import Footer from '@/components/common/Footer';
 import localFont from 'next/font/local';
+import Head from 'next/head';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
@@ -30,6 +31,12 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: '승현이의 개발 블로그',
+    description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
+    images: [`${baseUrl}/profile.png`],
+  },
 };
 
 const pretendard = localFont({
@@ -40,6 +47,8 @@ const pretendard = localFont({
 });
 
 const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
+const google_site_verification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const naver_site_verification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
 
 export default function RootLayout({
   children,
@@ -51,6 +60,16 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
+      <Head>
+        <meta
+          name="google-site-verification"
+          content={google_site_verification}
+        />
+        <meta
+          name="naver_site_verification"
+          content={naver_site_verification}
+        />
+      </Head>
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />
