@@ -1,0 +1,74 @@
+---
+title: '자바스크립트는 싱글 스레드인데 어떻게 비동기 처리를 할까?'
+description: JavaScript의 비동기 처리와 Event Loop가 어떻게 동작하는지 알아보자.
+category: javascript
+emoji: 🚀
+tags:
+  - JavaScript
+  - Event Loop
+  - 싱글 스레드
+  - 비동기
+  - 이벤트 루프
+date: '2024.10.12'
+fileName: 'javascript-async-and-event-loop'
+readingTime: 20
+---
+
+# 글을 시작하며
+
+**자바스크립트는 싱글 스레드 언어**입니다. 하지만 우리가 사용하는 웹 애플리케이션은 여러 작업을 동시에 처리하는 것처럼 보이며 비동기 처리가 가능합니다. 이번 글에서는 자바스크립트의 비동기 처리를 위한 핵심 메커니즘인 **이벤트 루프**의 구성요소와 동작 원리에 대해 알아보려 합니다.
+
+# Event Loop의 핵심 구성 요소
+
+이벤트 루프는 크게 콜 스택(Call Stack), 태스크 큐(Task Queue), 마이크로태스크 큐(Microtask Queue), 그리고 Web APIs 등으로 구성됩니다.
+
+- **Call Stack**: 현재 실행 중인 함수들이 쌓이는 스택 구조
+- **Web APIs**: setTimeout, fetch, DOM 이벤트 등 비동기 작업을 처리하는 API
+- **Task Queue(MacroTask Queue)**: Web API에서 완료된 비동기 작업의 콜백 함수가 대기하는 큐
+- **Microtask Queue**: Promise.then, MutationObserver 같은 작업들이 저장되는 우선순위가 높은 큐
+
+![img](/image/event-loop.png)
+
+> 자바스크립트 엔진은 단일 스레드만을 가지고 있지만, 브라우저나 Node.js와 같은 런타임 환경에서 타이머나 네트워크 요청과 같은 비동기 작업을 처리할 수 있는 추가적인 API들을을 제공합니다.
+
+# Event Loop의 동작 방식
+
+이벤트 루프는 **콜 스택이 비어 있는지 확인**한 후 태스크 큐 또는 마이크로태스크 **큐에서 작업을 가져와 실행**하는 방식으로 동작합니다.
+**이벤트 루프**는 작업을 **옮기는 역할만을 수행**하며 작업을 처리하는 주체는 **자바스크립트 엔진**과 **Wep API**입니다.
+
+- 1. 콜 스택(Call Stack)이 비어 있는지 확인한다.
+- 2. 마이크로태스크 큐에 대기 중인 작업이 있으면 먼저 실행한다.
+- 3. 마이크로태스크가 없다면, 태스크 큐에서 작업을 가져와 실행한다.
+- 4. 콜 스택이 다시 비게 되면 1번부터 반복한다.
+
+## 실행 흐름 예제
+
+```javascript
+console.log('Script start');
+
+setTimeout(() => {
+  console.log('setTimeout');
+}, 0);
+
+Promise.resolve()
+  .then(() => console.log('Promise 1'))
+  .then(() => console.log('Promise 2'));
+
+console.log('Script end');
+```
+
+출력 결과
+
+```
+Script start
+Script end
+Promise 1
+Promise 2
+setTimeout
+```
+
+`Promise`가 `setTimeout`보다 먼저 실행되는 이유는 **Microtask Queue**가 **Task Queue**보다 우선순위가 높기 때문입니다.
+
+# 결론
+
+JavaScript의 비동기 처리를 이해하면, 예상치 못한 실행 순서로 인해 발생하는 버그를 쉽게 해결할 수 있습니다. 이번 글을 통해 비동기 처리와 이벤트 루프의 개념을 명확히 이해하는 데 도움이 되었길 바랍니다! 🚀
