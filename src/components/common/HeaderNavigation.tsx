@@ -15,7 +15,9 @@ const HeaderNavigation = () => {
       <nav className="w-full h-16 sticky top-0 border-b font-bold z-50">
         <div className="w-full h-full glassmorphism">
           <div className="max-w-4xl lg:max-w-2xl mx-auto px-6 lg:px-0 h-full flex items-center justify-between">
-            <Link href={menus[0].path}>{menus[0].label}</Link>
+            <Link href={menus[0].path}>
+              <span className="text-lg font-extrabold">&lt; H /&gt;</span>
+            </Link>
             <div className="flex">
               <div className="hidden md:flex">
                 {menus.slice(1).map((menu) => (
