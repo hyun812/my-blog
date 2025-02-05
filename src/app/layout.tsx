@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     default: '승현이의 개발 블로그',
   },
   description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
+  icons: {
+    icon: `${baseUrl}/favicon_x192.png`,
+  },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
@@ -63,6 +66,11 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
+      <link
+        rel="icon"
+        href="./favicon.ico"
+        sizes="any"
+      />
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />
