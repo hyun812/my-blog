@@ -20,6 +20,10 @@
   @apply mt-12 mb-6;
 }
 
+.prose h1 {
+  @apply text-3xl;
+}
+
 .prose del {
   @apply text-mute;
 }
