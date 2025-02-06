@@ -1,9 +1,10 @@
-import { Post, PostData } from '@/types/post';
-import fs from 'fs';
+import { Post } from '@/types/post';
+import fs, { existsSync } from 'fs';
 import { sync } from 'glob';
 import matter from 'gray-matter';
 import path from 'path';
 import { cache } from 'react';
+import { cacheInstance } from './cache';
 
 export type ContentType = 'posts' | 'snippets';
 const BASE_PATHS = {
@@ -11,19 +12,15 @@ const BASE_PATHS = {
   snippets: path.join(process.cwd(), 'public/snippets'),
 };
 
-// 메모리 캐시를 위한 Map 객체들
-const postsCache = new Map<string, Post>();
-const pathsCache = new Map<ContentType, string[]>();
-
 // 콘텐츠에 맞는 MDX 파일 경로 조회
 export const getMDXFilePaths = cache((content: ContentType) => {
-  const cachedPaths = pathsCache.get(content);
+  const cachedPaths = cacheInstance.paths.get(content);
   if (cachedPaths) return cachedPaths;
 
   const contentPath = content === 'posts' ? `${BASE_PATHS[content]}/**` : BASE_PATHS[content];
 
   const paths = sync(`${contentPath}/**/*.mdx`);
-  pathsCache.set(content, paths);
+  cacheInstance.paths.set(content, paths);
 
   return paths;
 });
@@ -31,77 +28,83 @@ export const getMDXFilePaths = cache((content: ContentType) => {
 // 콘텐츠에 맞는 MDX 파일 목록 조회
 export const getMDXFileList = cache(async (content: ContentType) => {
   const paths = getMDXFilePaths(content);
+  try {
+    const posts = await Promise.all(
+      paths.map(async (path) => {
+        const cachedPost = cacheInstance.posts.get(path);
+        return cachedPost ?? (await parsePost(path));
+      }),
+    );
 
-  const posts = await Promise.all(
-    paths.map(async (path) => {
-      const cachedPost = postsCache.get(path);
-      if (cachedPost) return cachedPost;
-
-      const post = await parsePost(path);
-      postsCache.set(path, post);
-      return post;
-    }),
-  );
-
-  return posts.sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date));
+    return posts.sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date));
+  } catch (error) {
+    throw new Error(`Error parsing posts: ${error}`);
+  }
 });
 
 // 포스트 파일 파싱
 export const parsePost = (postPath: string): Post => {
-  const cachedPost = postsCache.get(postPath);
+  const cachedPost = cacheInstance.posts.get(postPath);
   if (cachedPost) return cachedPost;
 
-  const file = fs.readFileSync(postPath, 'utf8');
-  const { data, content } = matter(file);
+  // 파일 존재 여부 확인
+  if (!existsSync(postPath)) {
+    return DEFAULT_POST_DATA;
+  }
 
-  const post: Post = {
-    data: data as PostData,
-    content,
-  };
+  try {
+    const file = fs.readFileSync(postPath, 'utf8');
+    const { data, content } = matter(file);
 
-  postsCache.set(postPath, post);
-  return post;
+    const post: Post = {
+      data: data as Post['data'],
+      content,
+    };
+
+    cacheInstance.posts.set(postPath, post);
+    return post;
+  } catch (error) {
+    console.error(`Error parsing post: ${postPath}`, error);
+    return DEFAULT_POST_DATA;
+  }
 };
 
-// 이전/다음 포스트 조회
-export const getAdjacentPosts = cache(async (fileName: string) => {
-  const posts = await getMDXFileList('posts');
-  const currentIndex = posts.findIndex((post) => post.data.fileName === fileName);
+export const getAdjacentContent = cache(async (content: ContentType, fileName: string) => {
+  const contents = await getMDXFileList(content);
+  const currentIndex = contents.findIndex((content) => content!.data.fileName === fileName);
 
   return {
-    prevPost: currentIndex > 0 ? posts[currentIndex - 1] : posts[posts.length - 1],
-    nextPost: currentIndex < posts.length - 1 ? posts[currentIndex + 1] : posts[0],
+    prevPost: currentIndex > 0 ? contents[currentIndex - 1] : contents[contents.length - 1],
+    nextPost: currentIndex < contents.length - 1 ? contents[currentIndex + 1] : contents[0],
   };
 });
 
-// 이전/다음 스니펫 조회
-export const getAdjacentSnippets = cache(async (fileName: string) => {
-  const snippets = await getMDXFileList('snippets');
-  const currentIndex = snippets.findIndex((post) => post.data.fileName === fileName);
+export const getContentDetail = cache((content: ContentType, fileName: string, category?: string) => {
+  const basePath = BASE_PATHS[content];
+  const path = category ? `${basePath}/${category}/${fileName}.mdx` : `${basePath}/${fileName}.mdx`;
 
-  return {
-    prevPost: currentIndex > 0 ? snippets[currentIndex - 1] : snippets[snippets.length - 1],
-    nextPost: currentIndex < snippets.length - 1 ? snippets[currentIndex + 1] : snippets[0],
-  };
-});
-
-// category와 fileName을 받아 해당 포스트 조회
-export const getPostDetail = cache((category: string, fileName: string) => {
-  const path = `${BASE_PATHS.posts}/${category}/${fileName}.mdx`;
   return parsePost(path);
 });
 
-// category와 fileName을 받아 해당 snippet 조회
-export const getSnippetDetail = cache((fileName: string) => {
-  const path = `${BASE_PATHS.snippets}/${fileName}.mdx`;
-  return parsePost(path);
-});
-
-// 모든 포스트 카테고리 조회
+// 모든 카테고리 조회
 export const getPostListCategory = (): string[] => {
   const category = sync(`${BASE_PATHS.posts}/**/`)
     .map((folderPaths) => path.basename(folderPaths))
     .filter((path) => path !== 'posts');
 
   return category;
+};
+
+export const DEFAULT_POST_DATA: Post = {
+  data: {
+    title: 'Untitled',
+    date: new Date().toISOString(),
+    description: '',
+    tags: [],
+    fileName: '',
+    category: '',
+    emoji: '📝',
+    readingTime: 1,
+  },
+  content: '',
 };

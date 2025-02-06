@@ -1,5 +1,5 @@
 import PostDetail from '@/components/posts/PostDetail';
-import { getMDXFileList, getPostDetail } from '@/utils/post';
+import { getMDXFileList, getContentDetail } from '@/utils/post';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -19,7 +19,8 @@ export const generateMetadata = async ({ params }: Props) => {
   const slug = (await params).slug;
   const [category, fileName] = slug;
 
-  const { data } = await getPostDetail(category, fileName);
+  const { data } = await getContentDetail('posts', fileName, category);
+  if (!data.fileName) return { title: 'Page Not Found', description: '요청하신 페이지를 찾을 수 없습니다.' };
 
   return {
     title: data.title,
