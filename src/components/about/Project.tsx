@@ -5,7 +5,7 @@ const Project = () => {
   return (
     <div className="mt-20">
       <h2 className="text-3xl font-bold">프로젝트</h2>
-      <div className="mt-10">
+      <div className="mt-16">
         {projects.map((project) => (
           <div
             key={project.name}
@@ -14,8 +14,8 @@ const Project = () => {
             <div className="w-28 h-28">
               <Image
                 src={project.imageSrc}
-                width={110}
-                height={110}
+                width={100}
+                height={100}
                 alt="profile"
                 className="border object-cover shadow-sm rounded-md"
               />
@@ -23,10 +23,10 @@ const Project = () => {
             <div className="flex-1">
               <a
                 href={project.githubLink}
-                className="flex items-center mt-2"
+                className="flex items-center mt-1"
               >
                 <h3
-                  className={`text-xl font-semibold underline underline-offset-4  pointerHover:hover:text-primary-500 dark:pointerHover:hover:text-primary-400`}
+                  className={`text-xl font-semibold underline underline-offset-[6px] pointerHover:hover:text-primary-500 dark:pointerHover:hover:text-primary-400`}
                 >
                   {project.title}, {project.name}
                 </h3>
@@ -36,7 +36,7 @@ const Project = () => {
                 <p className="text-sm text-basic-400">{project.period}</p>
               </div>
               <p className="text-sm mt-3">{project.skills.join(', ')}</p>
-              <ul className="list-disc pl-3 pt-3 flex flex-col gap-2">
+              <ul className="list-disc pl-3 pt-5 flex flex-col gap-2 text-[0.9rem]">
                 {project.descriptions.map((description) => (
                   <li key={description}>{description}</li>
                 ))}
