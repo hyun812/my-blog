@@ -8,8 +8,8 @@ const Introduction = () => {
       <div className="flex-center gap-10 mt-20">
         <div>
           <div>
-            <h2 className="text-3xl">
-              안녕하세요 <br /> <span className="text-4xl font-bold pr-1">이승현</span>입니다.
+            <h2 className="text-2xl sm:text-3xl">
+              안녕하세요 <br /> <span className="text-3xl sm:text-4xl font-bold pr-1">이승현</span>입니다.
             </h2>
           </div>
           <div className="flex pt-3">
@@ -18,8 +18,8 @@ const Introduction = () => {
         </div>
         <Image
           src="/profile.png"
-          width={140}
-          height={140}
+          width={130}
+          height={130}
           alt="profile"
           className="object-fill rounded-full"
         />

@@ -11,7 +11,7 @@ const Award = () => {
               key={award.name}
               className="flex flex-col sm:flex-row gap-5"
             >
-              <div className="basis-2/5">
+              <div className="basis-1/3">
                 <p className="text-lg font-semibold">{award.name}</p>
                 <p className="text-sm text-basic-500 pt-1">{award.date}</p>
               </div>
