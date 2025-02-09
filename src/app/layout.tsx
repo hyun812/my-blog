@@ -13,9 +13,6 @@ export const metadata: Metadata = {
     default: `${siteConfig.name}`,
   },
   description: `${siteConfig.description}`,
-  icons: {
-    icon: `${siteConfig.url}/favicon_x512.png`,
-  },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
@@ -65,11 +62,6 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <link
-        rel="icon"
-        href="./favicon.ico"
-        sizes="any"
-      />
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />
