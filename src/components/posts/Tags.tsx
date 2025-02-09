@@ -4,7 +4,7 @@ const Tags = ({ tags }: { tags: string[] }) => {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="border rounded-full px-2 py-1 text-sm"
+          className="rounded-full px-2 py-1 text-sm bg-primary-300 text-white dark:bg-primary-800"
         >
           {tag}
         </span>

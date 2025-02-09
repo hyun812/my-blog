@@ -5,39 +5,35 @@ import HeaderNavigation from '@/components/common/HeaderNavigation';
 import ThemeProvider from '@/components/common/ThemeProvider';
 import Footer from '@/components/common/Footer';
 import localFont from 'next/font/local';
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+import { siteConfig } from '@/constants/site';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - 승현이의 개발 블로그',
-    default: '승현이의 개발 블로그',
+    template: `%s - ${siteConfig.name}`,
+    default: `${siteConfig.name}`,
   },
-  description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
-  icons: {
-    icon: `${baseUrl}/favicon_x512.png`,
-  },
+  description: `${siteConfig.description}`,
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: baseUrl,
-    title: '승현이의 개발 블로그',
-    siteName: '승현이의 개발 블로그',
-    description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
+    url: siteConfig.url,
+    title: `${siteConfig.name}`,
+    siteName: `${siteConfig.name}`,
+    description: `${siteConfig.description}`,
     images: [
       {
-        url: `${baseUrl}/profile.png`,
+        url: `${siteConfig.url}/profile.png`,
         width: 1200,
         height: 630,
-        alt: '승현이의 개발 블로그',
+        alt: `${siteConfig.name}`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '승현이의 개발 블로그',
-    description: '웹 프론트엔드 개발과 관련한 포스트를 작성하고 있습니다.',
-    images: [`${baseUrl}/profile.png`],
+    title: `${siteConfig.name}`,
+    description: `${siteConfig.description}`,
+    images: [`${siteConfig.url}/profile.png`],
   },
   verification: {
     google: 't29XaUESiJ2TKT7JtnuW1w9Pl0R1prya8W8xh6T6crc',
@@ -48,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 const pretendard = localFont({
-  src: './PretendardVariable.woff2',
+  src: '../assets/fonts/PretendardVariable.woff2',
   display: 'swap',
   weight: '45 920',
   variable: '--font-pretendard',
@@ -66,11 +62,6 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <link
-        rel="icon"
-        href="./favicon.ico"
-        sizes="any"
-      />
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />

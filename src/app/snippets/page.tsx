@@ -1,7 +1,7 @@
 import SnippetList from '@/components/snippets/SnippetList';
 import { getMDXFileList } from '@/utils/post';
 import { Suspense } from 'react';
-import SnippetSkeleton from '@/components/common/SnippetSkeleton';
+import SnippetSkeleton from '@/components/skeleton/SnippetSkeleton';
 
 const SnippetsPage = async () => {
   const snippetList = await getMDXFileList('snippets');

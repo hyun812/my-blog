@@ -6,8 +6,8 @@ const SnippetSkeleton = () => {
           key={idx}
           className="border rounded-lg p-5"
         >
-          <div className="w-full h-5 rounded mb-2 bg-basic-200"></div>
-          <div className="w-2/5 h-3 rounded bg-basic-150"></div>
+          <div className="w-full h-5 rounded mb-2 bg-basic-200 dark:bg-basic-700" />
+          <div className="w-2/5 h-3 rounded bg-basic-150 dark:bg-basic-700" />
         </div>
       ))}
     </div>
