@@ -2,7 +2,7 @@ import CategoryChips from '@/components/posts/CategoryChips';
 import PostList from '@/components/posts/PostList';
 import { getMDXFileList, getPostListCategory } from '@/utils/post';
 import { Suspense } from 'react';
-import PostSkeleton from '@/components/common/PostSkeleton';
+import PostSkeleton from '@/components/skeleton/PostSkeleton';
 import CategorySkeleton from '@/components/common/CategorySkeleton';
 
 const PostsPage = async () => {

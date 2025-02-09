@@ -1,4 +1,4 @@
-import PostDetailSkeleton from '@/components/common/PostDetailSkeleton';
+import PostDetailSkeleton from '@/components/skeleton/PostDetailSkeleton';
 
 const Loading = () => {
   return <PostDetailSkeleton />;
