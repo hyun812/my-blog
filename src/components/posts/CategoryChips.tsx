@@ -21,7 +21,7 @@ const CategoryChips = ({ category }: { category: string[] }) => {
 
   return (
     <div className="my-10 pb-10 border-b">
-      <ul className="flex items-center gap-x-3 gap-y-1 flex-wrap">
+      <ul className="flex items-center gap-x-1 gap-y-1 flex-wrap">
         {category.map((chip) => (
           <li
             key={chip}
