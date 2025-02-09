@@ -1,11 +1,10 @@
 import PostDetail from '@/components/posts/PostDetail';
+import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail } from '@/utils/post';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 export async function generateStaticParams() {
   const postList = await getMDXFileList('posts');
@@ -30,7 +29,7 @@ export const generateMetadata = async ({ params }: Props) => {
       type: 'article',
       title: data.title,
       description: data.description,
-      url: `${baseUrl}/posts/${category}/${fileName}`,
+      url: `${siteConfig.url}/posts/${category}/${fileName}`,
       tags: data.tags,
     },
   };

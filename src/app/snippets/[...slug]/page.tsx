@@ -1,11 +1,10 @@
 import SnippetDetail from '@/components/snippets/SnippetDetail';
+import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail } from '@/utils/post';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 export async function generateStaticParams() {
   const snippetList = await getMDXFileList('snippets');
@@ -30,7 +29,7 @@ export const generateMetadata = async ({ params }: Props) => {
       type: 'article',
       title: data.title,
       description: data.description,
-      url: `${baseUrl}/snippets/${fileName}`,
+      url: `${siteConfig.url}/snippets/${fileName}`,
       tags: data.tags,
     },
   };
