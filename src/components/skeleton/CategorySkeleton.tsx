@@ -1,5 +1,3 @@
-import React from 'react';
-
 const CategorySkeleton = () => {
   return (
     <div className="w-full my-10 pb-10 border-b">

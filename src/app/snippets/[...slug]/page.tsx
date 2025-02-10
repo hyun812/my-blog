@@ -1,6 +1,12 @@
-import SnippetDetail from '@/components/snippets/SnippetDetail';
+import Giscus from '@/components/post_detail/Giscus';
+import PostBody from '@/components/post_detail/PostBody';
+import PostHeader from '@/components/post_detail/PostHeader';
+import PostNavigation from '@/components/post_detail/PostNavigation';
+import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
+import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
-import { getMDXFileList, getContentDetail } from '@/utils/post';
+import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
+import { notFound } from 'next/navigation';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -38,8 +44,29 @@ export const generateMetadata = async ({ params }: Props) => {
 const SnippetDetailPage = async ({ params }: Props) => {
   const slug = (await params).slug;
   const fileName = slug[0];
+  const [snippet, adjacent] = await Promise.all([
+    getContentDetail('snippets', fileName),
+    getAdjacentContent('snippets', fileName),
+  ]);
 
-  return <SnippetDetail fileName={fileName}></SnippetDetail>;
+  if (!snippet.content || !adjacent.nextPost.content) return notFound();
+  return (
+    <>
+      <article className="h-full relative border-b pb-8">
+        <PostHeader data={snippet.data} />
+        <PostBody content={snippet.content} />
+        <PostTableOfContent />
+        <Tags tags={snippet.data.tags} />
+      </article>
+      <section>
+        <PostNavigation
+          content="snippets"
+          adjacent={adjacent}
+        />
+        <Giscus />
+      </section>
+    </>
+  );
 };
 
 export default SnippetDetailPage;

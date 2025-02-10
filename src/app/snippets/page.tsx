@@ -1,4 +1,4 @@
-import SnippetList from '@/components/snippets/SnippetList';
+import SnippetList from '@/components/snippet_list/SnippetList';
 import { getMDXFileList } from '@/utils/post';
 import { Suspense } from 'react';
 import SnippetSkeleton from '@/components/skeleton/SnippetSkeleton';

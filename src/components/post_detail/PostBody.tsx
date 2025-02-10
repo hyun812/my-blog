@@ -4,7 +4,7 @@ import remarkBreaks from 'remark-breaks';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrism from 'rehype-prism-plus';
-import CodeBlock from './CodeBlock';
+import CodeBlock from '../mdx/CodeBlock';
 
 interface IPostDetailProps {
   content: string;

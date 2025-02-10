@@ -1,5 +1,5 @@
 import MorePostButton from '@/components/home/MorePostButton';
-import PostList from '@/components/posts/PostList';
+import PostList from '@/components/post_list/PostList';
 import PostSkeleton from '@/components/skeleton/PostSkeleton';
 import { getMDXFileList } from '@/utils/post';
 import { Suspense } from 'react';

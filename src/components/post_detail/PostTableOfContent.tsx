@@ -20,10 +20,10 @@ const PostTableOfContent = () => {
     <aside className="absolute top-0 left-[calc(50%+380px)] h-full w-60 hidden lg:block">
       <nav
         aria-label="Table of contents"
-        className="sticky top-[130px] text-sm border-l p-5"
+        className="sticky top-[130px] border-l p-5"
       >
-        <p className="font-bold pb-2">목차</p>
-        <ul className="space-y-1 text-basic-400 dark:text-basic-500">
+        <p className="font-bold pb-2 text-sm">목차</p>
+        <ul className="space-y-1 text-basic-400 dark:text-basic-500 text-xs">
           {tableOfContent.map((toc) => {
             const { id, level, textContent } = toc;
             const isActive = currentHeading === id;

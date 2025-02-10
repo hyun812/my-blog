@@ -66,9 +66,9 @@ export default function RootLayout({
         <ThemeProvider>
           <HeaderNavigation />
           <main className="mx-auto max-w-4xl lg:max-w-2xl px-6 lg:px-0">{children}</main>
-          {gaId && <GoogleAnalytics gaId={gaId} />}
           <Footer />
         </ThemeProvider>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
