@@ -19,7 +19,7 @@ const HeaderNavigation = () => {
             <Link href={siteConfig.menus[0].path}>
               <Image
                 alt="logo"
-                src="/logo.png"
+                src="/image/logo.png"
                 width={75}
                 height={15}
               />

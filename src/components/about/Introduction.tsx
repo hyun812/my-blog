@@ -17,7 +17,7 @@ const Introduction = () => {
           </div>
         </div>
         <Image
-          src="/profile.png"
+          src="/image/profile.png"
           width={130}
           height={130}
           alt="profile"
