@@ -41,12 +41,8 @@
 }
 
 .prose a {
-  @apply text-primary break-words transition-all;
-  @apply decoration-basic-450 underline-offset-2 pointerHover:hover:decoration-basic-350;
-}
-.prose a:has(strong) {
-  @apply decoration-yellow-300 decoration-wavy underline-offset-1 pointerHover:hover:decoration-yellow-400;
-  @apply dark:decoration-yellow-300/70 dark:pointerHover:hover:decoration-yellow-300/90;
+  @apply text-primary-300 break-words transition-all;
+  @apply underline-offset-4 pointerHover:hover:text-primary-300/70;
 }
 
 .prose code {
@@ -54,7 +50,7 @@
 }
 
 .prose code:not(:where(pre *)) {
-  @apply text-primary rounded-lg px-2 py-0.5 content-none;
+  @apply text-primary rounded px-2 mx-[2px] py-0.5 content-none;
   @apply bg-basic-200 dark:bg-basic-750;
 }
 
@@ -104,11 +100,11 @@
   font-style: normal !important;
   border-left-color: var(--prism-highlight) !important;
   margin: 1.4rem 0 !important;
-  @apply p-4 bg-basic-100 dark:bg-basic-800;
+  @apply p-1 bg-basic-100 dark:bg-basic-800;
 }
 
 .prose :where(p, ul, ol):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  margin: 1.1rem 0 !important;
+  margin: 0.8rem 0 !important;
 }
 
 .prose blockquote > :first-child {
