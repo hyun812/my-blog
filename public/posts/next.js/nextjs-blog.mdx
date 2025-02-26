@@ -1,0 +1,322 @@
+---
+title: 'Next.js 블로그 만들기 (App Router + MDX)'
+description: 프론트엔드 개발자라면 개인 블로그 하나쯤은..
+category: next.js
+emoji: 🚀
+tags:
+  - Next.js
+  - App Router
+  - MDX
+  - 블로그
+date: '2025.02.26'
+fileName: 'nextjs-blog'
+readingTime: 30
+---
+
+# 글을 시작하며
+
+tistory, velog 등 블로그를 위한 플랫폼은 이미 존재합니다. UI 커스텀, 통계 등 쉽게 사용할 수 있는 기능 또한 제공해줍니다.
+이번 글에서는 그럼에도 불구하고 왜 직접 블로그를 만들게 됐는지, 또 어떻게 구현했는지 설명해보고자 합니다.
+
+# 직접 블로그를 만든 이유
+
+## 프론트엔드 개발자로서의 작업물
+
+프론트엔드 개발자로서 직접 블로그를 개발하는 것은 단순한 글 작성 도구를 넘어 포트폴리오의 일부가 될 수 있습니다. 이를 통해 개발 역량을 증명할 수 있으며, 새로운 기술을 학습하고 적용하면서 더 깊이 있는 경험을 쌓을 수 있다고 생각했습니다.
+
+## 원하는 대로 커스터마이징
+
+기존 블로그 플랫폼 또한 커스터마이징 기능을 제공하지만 세부적인 디자인을 수정하거나 원하는 기능을 추가하는 데는 한계가 있습니다. 내가 원하는 UI/UX를 설계하고, 필요에 따라 새로운 기능을 확장하거나 제거할 수 있습니다.
+
+# 어떻게 만들었을까?
+
+> 잘 만든 블로그 래퍼런스들을 참고하며 UI 및 기술을 선정했고, 이를 기반으로 개발을 진행했습니다.
+
+## 기능 정리
+
+블로그에서 구현하고자 하는 기능들을 정리해보고, 필수기능과 부가기능을 분리하여 개발의 우선순위를 정하고 작업을 진행했습니다.
+
+**필수 기능 (기본적인 블로그를 위한 핵심 기능)**
+
+- 게시글 목록 페이지
+- 게시글 상세 페이지
+- 댓글 기능
+
+**부가 기능 (사용자 경험 향상을 위한 기능)**
+
+- 다크/라이트 모드
+- 목차 사이드바 (Table Of Content)
+- 카테고리 chips
+- 반응형 디자인
+- 검색 엔진 최적화 (SEO) + 성능 개선
+- Google Analytics
+
+## 기술 스택 선정
+
+**1. Framework: Next.js**
+
+SEO가 중요한 블로그 서비스인 점을 고려하여 서버 사이드 렌더링(SSR)과 정적 생성(SSG)이 가능한 Next.js를 선택했습니다.
+
+**2. Design: Tailwind CSS**
+
+클래스 네이밍 없이 빠르게 스타일링이 가능하며, 파일 간 이동(Context Switching) 없이 스타일을 관리할 수 있어 편리합니다. 또한 Next.js와의 호환성도 좋아 선택하게 됐습니다.
+
+**3. 글 작성: MDX**
+
+블로그 포스팅 글을 MDX 파일로 작성해 프로젝트 내부 디렉토리에 저장했습니다. 기존에 노션에 정리했던 글들을 그대로 활용할 수 있으며, 익숙했던 마크다운 문법으로 유연한 글 작성 시스템을 구축할 수 있다는 점에서 선택했습니다.
+
+**4. 글 파싱: Gray-matter + next-mdx-remote**
+
+MDX 파일의 메타 정보와 본문 내용을 파싱하기 위해 사용했습니다.
+
+- gray-matter : 글 제목, 설명, 작성일 등의 메타데이터를 파싱
+- next-mdx-remote : MDX 파일을 HTML로 변환하여 렌더링 (remark, rehype)
+
+**5. 댓글: Giscus**
+
+Github Discuss 기반으로 동작하는 댓글 서비스입니다. 별도의 백엔드 구축 없이 댓글 기능을 구현할 수 있으며 Github 계정만 있으면 로그인 없이 댓글을 작성이 가능하여 선택했습니다.
+
+**6. 배포: Vercel**
+
+Next.js는 vercel에서 만든 프레임워크입니다. 따라서 호환성이 매우 높고 github repository를 연동시 CI/CD 파이프라인을 자동화하여 코드 푸시 시 즉시 배포가 가능합니다.
+
+## 디렉토리 구조
+
+```bash
+public/
+  images: 게시글 내부에 사용할 이미지 asset 저장
+  posts: 게시글 mdx 파일 저장
+  snippets: 코드 조각 mdx 파일 저장
+src/
+  app
+  assets
+  components
+  constants
+  hooks
+  styles
+  types
+  utils
+```
+
+# 기능 개발
+
+## MDX 파일 관리
+
+게시글은 `public/posts` 디렉토리에 저장했습니다.
+
+각 게시글의 전체 경로는 `public/posts/category_name/title.mdx` 입니다.
+
+각 게시글의 가장 상단에는 meta data를 작성했습니다.
+
+```markdown
+---
+title: 'Next.js 블로그 만들기 (App Router)'
+description: 프론트엔드 개발자라면 개인 블로그 하나쯤은..
+category: next.js
+tags:
+  - Next.js
+  - App Router
+  - 블로그
+date: '2025.02.26'
+fileName: 'nextjs-blog'
+readingTime: 30
+---
+```
+
+> 제 블로그의 경우 posts 이외에도 개발하면서 유용하게 사용했던 코드 조각인 snippets 콘텐츠가 존재합니다. snippets의 경로는 `public/posts/title.mdx` 처럼 카테고리 없이 경로를 설정했습니다.
+
+## 글 정보 parsing
+
+콘텐츠에 맞는 모든 mdx 파일의 경로를 전부 탐색합니다.
+
+```tsx
+import { sync } from 'glob';
+
+export type ContentType = 'posts' | 'snippets';
+const BASE_PATHS = {
+  posts: path.join(process.cwd(), 'public/posts'),
+  snippets: path.join(process.cwd(), 'public/snippets'),
+};
+
+export const getMDXFilePaths = (content: ContentType): string[] => {
+  const contentPath = content === 'posts' ? `${BASE_PATHS[content]}/**` : BASE_PATHS[content];
+  const paths = sync(`${contentPath}/**/*.mdx`);
+
+  return paths;
+};
+```
+
+parsing 하는 함수는 다음과 같이 작성했습니다.
+
+게시글 파일을 `matter` 함수의 인자로 전달하고 `data` , `content` 를 얻습니다.
+
+이때 `data`는 mdx 파일의 상단 ‘---’ 로 구분된 영역이 parsing 되며 `content`는 상단 구분 영역을 제외한 나머지 영역이 하나의 string으로 전달됩니다.
+
+```tsx
+import fs from 'fs';
+import matter from 'gray-matter';
+
+export const parsePost = (postPath: string): Post => {
+  const file = fs.readFileSync(postPath, 'utf8');
+  const { data, content } = matter(file);
+
+  return {
+    data: data as PostData,
+    content,
+  };
+};
+```
+
+## 글 목록 페이지
+
+최신순으로 글이 보여질 수 있도록 정렬하여 전체 게시글 목록을 반환합니다.
+
+```tsx
+export const getMDXFileList = async (content: ContentType) => {
+  const paths = getMDXFilePaths(content);
+  const posts = await Promise.all(paths.map((path) => parsePost(path)));
+
+  return posts.sort((a, b) => +new Date(b.data.date) - +new Date(a.data.date));
+};
+```
+
+이후 불러온 리스트를 렌더해주면 됩니다!
+
+```tsx
+const PostList = () => {
+  const postList = await getMDXFileList('posts');
+  const category = getPostListCategory();
+
+  return (
+    <div>
+      <CategoryChips category={category} />
+      <ul>
+        {postList.map((post) => (
+          <PostItem
+            key={post.data.title + post.data.date}
+            post={post}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+## 글 상세 페이지
+
+상세 페이지는 다음과 같이 작성했습니다.
+
+`generateStaticParams` 을 통해 정적으로 페이지를 생성 했고 이후 해당 게시글의 내용과 하단 네비게이션에 활용할 이전/다음 게시글의 정보를 가져왔고 `Promise.all` 을 통해 두 개의 비동기 작업을 동시에 처리했습니다.
+
+```tsx
+type Props = {
+  params: Promise<{ slug: string[] }>;
+};
+
+export async function generateStaticParams() {
+  const postList = await getMDXFileList('posts');
+
+  return postList.map((post) => ({
+    slug: [post.data.category, post.data.fileName],
+  }));
+}
+
+const PostDetailPage = async ({ params }: Props) => {
+  const slug = (await params).slug;
+  const [category, fileName] = slug;
+
+  const [post, adjacent] = await Promise.all([
+    getContentDetail('posts', fileName, category),
+    getAdjacentContent('posts', fileName),
+  ]);
+
+  return (
+    <>
+      <article>
+        <PostHeader data={post.data} />
+        <PostBody content={post.content} />
+        <PostTableOfContent />
+        <Tags tags={post.data.tags} />
+      </article>
+      <section>
+        <PostNavigation
+          content="posts"
+          adjacent={adjacent}
+        />
+        <Giscus />
+      </section>
+    </>
+  );
+};
+
+export default PostDetailPage;
+```
+
+블로그 게시글의 본문을 처리하는 `PostBody` 컴포넌트를 자세히 알아보겠습니다.
+
+```tsx
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypePrism from 'rehype-prism-plus';
+import CodeBlock from '../mdx/CodeBlock';
+
+interface IPostDetailProps {
+  content: string;
+}
+
+const MdxComponents = {
+  pre: CodeBlock,
+};
+
+const PostBody = ({ content }: IPostDetailProps) => {
+  return (
+    <div className="prose dark:prose-invert flex-1">
+      <MDXRemote
+        source={content}
+        components={MdxComponents}
+        options={{
+          mdxOptions: {
+            remarkPlugins: [remarkGfm, remarkBreaks],
+            rehypePlugins: [
+              rehypeSlug,
+              rehypePrism,
+              [
+                rehypeAutolinkHeadings,
+                {
+                  properties: {
+                    className: ['anchor'],
+                    ariaLabel: 'anchor',
+                  },
+                },
+              ],
+            ],
+          },
+        }}
+      />
+    </div>
+  );
+};
+
+export default PostBody;
+```
+
+사용한 라이브러리는 아래와 같습니다.
+
+- **remark plugins** - Markdown 처리
+  - `remarkGfm`: GitHub Flavored Markdown(GFM)을 지원(표, 체크박스 등)
+  - `remarkBreaks`: 줄바꿈을 `<br>`로 변환하여 줄바꿈을 쉽게 처리.
+- **rehype plugins** - HTML 변환 처리
+  - `rehypeSlug`: 헤딩(`<h1>`, `<h2>`, ...) 태그에 자동으로 `id`를 추가하여 링크를 쉽게 만듦.
+  - `rehypeAutolinkHeadings`: 제목 태그에 자동으로 앵커(`🔗`)를 추가
+  - `rehypePrismPlus`: Prism.js를 사용하여 코드 블록을 하이라이팅.
+
+> 코드블럭의 경우 복사 기능을 추가로 구현하기 위해 커스텀으로 컴포넌트를 구현했습니다. 지정하지 않은 요소에는 MDX 기본 변환 요소가 사용됩니다.
+
+# 마무리하며
+
+블로그의 필수적인 기능은 이와 같이 구현했습니다.
+부가 적인 기능인 목차 사이드바, 다크/라이트 모드, 댓글 기능은 다음 게시글에서 다뤄보도록 하겠습니다.
