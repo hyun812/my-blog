@@ -1,0 +1,169 @@
+---
+title: 'Lighthouse로 Next.js 성능 개선하기'
+description: 이미지, 폰트, 번들 최적화를 통한 Lighthouse 성능 개선 방법에 대해 알아보자
+category: next.js
+emoji: ⚡️
+tags:
+  - Next.js
+  - Lighthouse
+  - SEO
+  - 웹 접근성
+  - 페이지 속도
+  - 성능 개선
+date: '2025.03.01'
+fileName: 'lighthouse-performance'
+readingTime: 30
+---
+
+# 글을 시작하며
+
+웹 성능은 사용자 경험과 SEO에 큰 영향을 미칩니다. 이번 글에서는 Lighthouse를 활용하여 Next.js 프로젝트의 성능을 분석하고, 이를 개선하는 방법에 대해 알아보고자 합니다.
+
+![img](/image/lighthouse_3.png)
+
+# Lighthouse란?
+
+Lighthouse는 웹 페이지의 품질을 측정하는 오픈소스 도구로, Google에서 제공하고 있습니다. Lighthouse는 다음과 같은 점수를 제공합니다.
+
+1. **Performance(성능)**: 페이지 로딩 속도 및 최적화 정도
+2. **Accessibility(접근성)**: 시각, 청각, 신체적 장애를 가진 사용자를 위한 접근성 평가
+3. **Best Practices(최고의 실천법)**: 웹 개발의 보안 및 표준 준수 여부
+4. **SEO**: 검색 엔진 최적화 상태
+
+그 중에서도 `Performance` 점수는 사용자 경험에 큰 영향을 미치기 때문에 이를 개선하는 것이 중요합니다.
+
+- First Contentful Paint (FCP): 첫 번째 컨텐츠가 표시되는 시간
+- Largest Contentful Paint (LCP): 가장 큰 요소가 렌더링되는 시간
+- Total Blocking Time (TBT): 페이지가 응답하지 않는 시간
+- Cumulative Layout Shift (CLS): 화면이 예기치 않게 이동하는 정도
+
+> 개발 환경에서는 프로덕션 환경보다 성능이 더 낮게 측정 될 수 있기때문에 실제 프로덕션 환경에서 테스트하는 것이 좋습니다.
+
+# 이미지 최적화
+
+## WebP 및 AVIF 포맷 사용
+
+WebP와 AVIF는 기존 JPEG, PNG보다 더 높은 압축률을 제공하면서도 화질 손상이 적은 최신 이미지 포맷입니다.
+
+- WebP: JPEG, PNG보다 약 26% 더 효율적인 압축 제공
+- AVIF: WebP보다 20% 더 높은 압축률, JPEG, PNG 대비 30~50% 더 작은 파일 크기
+
+Next.js의 `next/image`를 활용하면 브라우저가 지원하는 최적의 포맷을 자동으로 제공하여 성능을 향상시킬 수 있습니다.
+`next.config.js` 파일에 다음과 같이 설정한다면 우선 AVIF 형식으로 변환하고, AVIF를 지원하지 않는 경우 WebP로 변경할 수 있습니다.
+
+```JavaScript
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  webpack: (config) => {
+    ...
+  },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
+};
+export default nextConfig;
+```
+
+네트워크 창을 통해 확인해보면 다음과 같이 이미지 형식이 avif로 변경된 것을 확인할 수 있습니다.
+
+![img](/image/lighthouse_1.png)
+
+## Lazy Loading 활용
+
+`Lazy Loading`이란 로드를 필요할 때까지 지연시키는 기술로, 이미지가 뷰포트에 들어올 때 로드하는 방식입니다. 따라서 첫 로딩 시에 필요한 이미지만 빠르게 로드할 수 있기 때문에 초기 페이지 로딩 속도를 개선할 수 있습니다.
+`next/image`의 `loading` 속성을 `lazy`로 설정하면 자동으로 lazy loading을 적용할 수 있습니다.
+
+```tsx
+<Image
+  src="/example.jpg"
+  alt="예제 이미지"
+  width={500}
+  height={300}
+  loading="lazy"
+/>
+```
+
+> 추가적으로 next/image는 `priority`속성을 통해 중요한 이미지를 먼저 로드하거나, `placeholder` 및 `blur 처리`를 통해 이미지 로딩 중 placeholder를 표시할 수 있으며, `srcSet`을 통해 화면 크기에 따라 다른 이미지 제공, quality 속성을 통한 이미지 품질 조절 등 다양한 기능을 제공합니다.
+
+# 폰트 최적화
+
+## 폰트 포맷
+
+TTF, OTF, WOFF, WOFF2 등 다양한 폰트 포맷이 존재하지만, WOFF2는 WOFF의 개선된 버전으로 더욱 효율적인 압축을 통해 파일 크기를 최소화할 수 있습니다. ttf보다 약 30% 더 효율적으로 압축할 수 있습니다.
+이전에는 WOFF2를 지원하지 않는 브라우저가 있었지만, 현재 대부분의 브라우저가 WOFF2를 지원하고있습니다.
+
+![img](/image/lighthouse_2.png)
+
+## swap 속성
+
+`display: swap`은 폰트 로딩 중에 텍스트가 기본 폰트로 먼저 렌더링되고, 폰트 파일이 로드되면 해당 폰트로 교체되도록 합니다. 자세한 작동 방식은 아래와 같습니다.
+
+- **1. 기본 폰트 표시**: 웹페이지가 로드되면 브라우저는 기본 시스템 폰트로 텍스트를 먼저 렌더링함
+- **2. 폰트 로드 대기**: 브라우저는 비동기적으로 웹폰트를 로드함
+- **3. 폰트 교체**: 폰트 로드가 완료되면 기본 폰트를 웹 폰트로 교체함
+
+화면이 비어있는 시간이 줄어들기 때문에 FP(First Paint) 시간을 단축할 수 있습니다.
+
+## next/font 사용
+
+`next/font`는 자동으로 폰트 파일을 최적화하고, 폰트 로딩 중 레이아웃이 변경되는 현상(CLS)을 방지합니다. 또한 기본적으로 Preloading을 제공하여 중요한 폰트 리소스를 미리로드하고 성능을 향상 시킵니다.
+아래는 `next/font`를 사용한 예시입니다. 폰트를 프로젝트 전체에 적용하기위해 `RootLayout`에 적용하였습니다.
+
+```jsx
+import localFont from 'next/font/local';
+
+const pretendard = localFont({
+  src: './fonts/Pretendard-Regular.woff2',
+  display: 'swap',
+  variable: '--font-pretendard',
+});
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body className={`${pretendard.className}`}>
+        <ThemeProvider>
+          <main>{children}</main>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+# 번들 최적화
+
+모달과 같이 사용자의 상호작용이 있어야 보여지는 요소의 경우 코드 스플리팅을 적용하여 초기 로딩 속도를 개선할 수 있습니다.
+Next.js에서는 Dynamic import를 통해 파일을 동적으로 불러올 수 있습니다.
+
+```jsx
+import dynamic from 'next/dynamic';
+
+const Modal = dynamic(() => import('./Modal'));
+```
+
+# 마무리하며
+
+이번 글에서는 Lighthouse의 Performance 성능을 개선하는 방법에 대해 알아봤습니다. Lighthouse 덕분에 놓치고 있던 것들을 개선해볼 수 있었으며 꾸준한 분석과 개선을 통해 높은 성능 점수를 유지해보고자 합니다.
+제가 프로젝트에 활용했거나 학습한 부분을 정리하며 글을 마치겠습니다.
+
+- **이미지 최적화**
+  - `next/image` 컴포넌트 활용
+  - `AVIF` 형식 우선 적용 후 `WebP` 형식 적용
+  - `Lazy Loading` 적용을 통해 뷰포트 내 이미지만 로드
+  - LCP 콘텐츠 타겟에는 `proiority` 속성을 통해 먼저 로드
+  - LCP 콘텐츠 타겟에는 Lazy Loading 피하기
+- **폰트 최적화**
+  - `next/font` 사용
+  - `WOFF2` 포맷
+  - `display: swap` 설정
+- **번들 최적화**
+  - Dynamic import를 통한 `코드 스플리팅`
