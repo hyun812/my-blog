@@ -1,0 +1,73 @@
+---
+title: '자바스크립트 Deep Equal 구현'
+description: '자바스크립트 deepEqual 함수 구현 방법을 알아보자.'
+tags:
+  - javascript
+  - deep-equals
+  - 자바스크립트
+  - js
+date: '2024.12.05'
+fileName: 'deep-equals'
+readingTime: 10
+---
+
+# 글을 시작하며
+
+자바스크립트에서 값의 일치 여부를 체크하다보면 예상치 못한 결과를 마주할 때가 있습니다. 이번 글에서는 자바스크립트의 `deepEqual` 함수를 직접 구현해보면서 값의 일치 여부를 체크하는 방법에 대해 알아보고자 합니다.
+
+# deepEqual 함수 구현하기
+
+`deepEqual` 함수는 두 개의 인자를 받아서 깊은 수준에서 값의 일치 여부를 체크하는 함수입니다. 만약 아래와 같이 객체 안에 객체가 중첩되어 있을 때 단순 일치 여부를 체크하는 `===` 연산자만으로는 원하는 결과를 얻을 수 없습니다.
+
+```javascript
+const obj1 = { a: 1, b: { c: 2, d: { e: 3 } } };
+const obj2 = { b: { d: { e: 3, f: 4 }, c: 2 }, a: 1 };
+```
+
+아래는 `deepEqual` 함수를 구현한 예시입니다.
+
+```javascript
+function deepEqual(a, b) {
+  if (a === b) return true; // 동일한 참조거나 원시 값일 경우
+
+  if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) {
+    return false; // 둘 중 하나가 객체가 아니거나 null일 경우
+  }
+
+  // 두 객체의 키 배열을 가져옴
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  if (keysA.length !== keysB.length) {
+    return false; // 키의 개수가 다르면 다름
+  }
+
+  // 각 키에 대한 값들을 비교
+  for (let key of keysA) {
+    if (!keysB.includes(key)) {
+      return false; // b에 해당 키가 없으면 다름
+    }
+
+    if (!deepEqual(a[key], b[key])) {
+      return false; // 재귀적으로 깊은 비교
+    }
+  }
+
+  return true; // 모든 비교를 통과하면 동일함
+}
+
+const obj1 = { a: 1, b: { c: 2, d: { e: 3 } } };
+const obj2 = { b: { d: { e: 3, f: 4 }, c: 2 }, a: 1 };
+
+console.log(deepEqual(obj1, obj2)); // false
+```
+
+## 결론
+
+이번 글에서는 자바스크립트에서 **deepEqual** 함수의 구현 방법을 알아보았습니다. 객체나 배열과 같은 복잡한 구조에서 단순히 === 연산자로는 정확한 비교가 불가능할 때 deepEqual 함수를 사용하면 깊은 수준에서 값을 비교할 수 있습니다.
+
+요약
+
+- **deepEqual** 함수는 **타입, 값, 프로퍼티 개수, 키와 값**을 비교하여 두 객체나 배열이 동일한지 확인합니다.
+- 객체나 배열이 중첩될 경우 **재귀적인 비교**를 통해 정확한 비교가 가능합니다.
+- **배열의 경우 순서까지** 고려하여 비교하며, **null도 객체로 취급**되므로 이를 특별히 처리해주어야 합니다.
