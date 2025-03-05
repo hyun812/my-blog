@@ -6,6 +6,7 @@ import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
 import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
+import Head from 'next/head';
 import { notFound } from 'next/navigation';
 
 type Props = {
@@ -51,10 +52,41 @@ const PostDetailPage = async ({ params }: Props) => {
     getAdjacentContent('posts', fileName),
   ]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.data.title,
+    description: post.data.description,
+    url: `${siteConfig.url}/posts/${category}/${fileName}`,
+    author: {
+      '@type': 'Person',
+      name: siteConfig.author,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteConfig.url}/image/logo.png`,
+      },
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.author,
+    },
+    keywords: post.data.tags.join(', '),
+    datePublished: post.data.date,
+    dateModified: post.data.date,
+    articleSection: 'Technology',
+    articleTag: category,
+  };
+
   if (!post.content || !adjacent.nextPost.content) return notFound();
 
   return (
     <>
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </Head>
       <article className="h-full relative border-b pb-8">
         <PostHeader data={post.data} />
         <PostBody content={post.content} />

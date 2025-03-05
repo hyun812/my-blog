@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     default: `${siteConfig.name}`,
   },
   description: `${siteConfig.description}`,
+  robots: 'follow, index',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',

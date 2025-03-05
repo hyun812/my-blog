@@ -6,6 +6,7 @@ import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
 import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
+import Head from 'next/head';
 import { notFound } from 'next/navigation';
 
 type Props = {
@@ -49,9 +50,40 @@ const SnippetDetailPage = async ({ params }: Props) => {
     getAdjacentContent('snippets', fileName),
   ]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: snippet.data.title,
+    description: snippet.data.description,
+    url: `${siteConfig.url}/snippets/${fileName}`,
+    author: {
+      '@type': 'Person',
+      name: siteConfig.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteConfig.url}/image/logo.png`,
+      },
+    },
+    keywords: snippet.data.tags.join(', '),
+    datePublished: snippet.data.date,
+    dateModified: snippet.data.date,
+    articleSection: 'Technology',
+    articleTag: snippet.data.tags[0],
+  };
+
   if (!snippet.content || !adjacent.nextPost.content) return notFound();
   return (
     <>
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </Head>
       <article className="h-full relative border-b pb-8">
         <PostHeader data={snippet.data} />
         <PostBody content={snippet.content} />
