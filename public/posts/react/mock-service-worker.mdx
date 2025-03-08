@@ -1,0 +1,199 @@
+---
+title: 'Mock Service Worker로 프론트엔드 API 모킹하기'
+description: 'Mock Service Worker(MSW)를 사용하여 프론트엔드 개발을 더 효율적으로 진행하는 방법을 알아보자'
+category: react
+emoji: 🎭
+tags:
+  - Mock Service Worker
+  - MSW
+  - Service Worker
+  - React
+  - javascript
+date: '2024.12.15'
+fileName: 'mock-service-worker'
+readingTime: 15
+---
+
+# 글을 시작하며
+
+프론트엔드 개발자라면 백엔드 API가 아직 준비되지 않아 프론트엔드 개발이 지연되는 상황을 누구나 한 번쯤 경험해 보았을 것입니다.
+
+평소에는 화면에 필요한 데이터를 애플리케이션의 내부 로직에 직접 Mocking하여 개발을 진행해왔습니다. 구현이 쉬워 빠르게 적용할 수는 있지만 추후 수정해야 할 로직도 늘어나고, 로딩이나 에러 등의 API의 응답상태에 따라 달라지는 각각의 화면을 대응하기도 쉽지 않았습니다.
+
+비효율적으로 대기해야하는 시간을 줄이기 위한 방법이 없을까? 최대한 백엔드 개발과 병행해서 프론트엔드 개발을 진행하려면 어떻게 해야할까? 라는 고민을 하게 되었습니다.
+
+![img](/image/msw_2.png)
+
+이런 문제를 해결하고자 **Mock Service Worker(MSW)**를 도입하게 됐습니다. MSW는 Service Worker API를 활용하여 네트워크 레벨에서 요청을 가로채고 모의 응답을 제공하는 라이브러리입니다. 이를 통해 실제 API와 거의 동일한 환경에서 개발을 진행할 수 있으며, 코드 수정 없이도 실제 API로 쉽게 전환할 수 있습니다.
+
+이번 글에서는 MSW를 사용하여 프론트엔드 개발을 더 효율적으로 진행하는 방법에 대해 알아보고자 합니다.
+
+# Mock Service Worker란 무엇인가?
+
+[Mock Service Worker(MSW)](https://mswjs.io)는 **네트워크 요청을 가로채고 모의 응답을 반환하는 API 모킹 라이브러리**입니다. 기존의 모킹 라이브러리와 다른 점은 **Service Worker API**를 사용하여 네트워크 레벨에서 모킹을 수행하기에 더욱 실제 환경과 유사한 테스트를 진행할 수 있습니다.
+
+## Service Worker란?
+
+`Service Worker`는 웹 애플리케이션의 **메인 스레드와 분리된 별도의 백그라운드 스레드에서 실행시킬 수 있는 기술** 중 하나입니다. Service Worker 덕분에 애플리케이션의 UI Blocking 없이 연산을 처리할 수 있으며 주로 다음과 같은 기능에 많이 사용되고 있습니다.
+
+- 오프라인 캐싱 및 PWA 지원 (인터넷 연결이 끊겨도 웹 사이트를 사용할 수 있도록 리소스를 캐싱)
+- 푸시 알림 (백그라운드에서 푸시 알림을 수신하고 사용자에게 알림 표시)
+- 백그라운드 동기화 (네트워크가 복구되면 자동으로 요청을 재시도)
+- 성능 최적화 (높은 비용의 작업을 백그라운드에서 수행)
+- 네트워크 요청 가로채고, 데이터를 변환 후 클라이언트에 제공
+
+> 대부분의 모던 브라우저에서 지원하고 있으나, 일부 브라우저에서는 지원하지 않으며 기본적으로 HTTPS 환경에서만 동작합니다.
+
+## MSW의 동작 원리
+
+![img](/image/msw_1.png)
+
+먼저 브라우저에 Service Worker를 등록합니다.
+
+그 이후부터는 브라우저에서 실제 이루어지는 요청을 Service Worker가 가로채게 됩니다.
+
+Service Worker에서는 해당하는 실제 요청을 복사해서 사용자가 정의한 핸들러에 전달합니다.
+이 핸들러는 모의 응답을 생성하고, 이를 실제 API 응답처럼 애플리케이션에 반환합니다.
+
+이러한 과정을 통해서 실제 API가 준비되지 않은 상황에서도 프론트엔드 개발을 원활하게 진행할 수 있습니다.
+
+> 저는 실제 API 스펙을 백엔드 개발자와 협의한 후 MSW를 통해 모의 응답을 생성하고, 프론트엔드 개발을 진행했습니다.
+
+# Mock Service Worker 적용하기
+
+먼저 MSW를 패키지를 설치합니다.
+
+```bash
+# npm을 사용하는 경우
+npm install msw --save-dev
+
+# yarn을 사용하는 경우
+yarn add msw --dev
+```
+
+MSW를 브라우저에서 사용하려면 Service Worker 파일을 public 디렉토리에 생성해야 합니다.
+
+```bash
+# public/mockServiceWorker.js에 파일 생성
+npx msw init public/ --save
+```
+
+저는 **API 리소스별로 핸들러와 모의 데이터를 별도로 분리하여 관리**했고 다음과 같이 폴더를 구성했습니다.
+
+```
+public/
+  mockServiceWorker.js
+src/
+  mocks/
+    api/
+      data/
+        users.ts
+        ...
+      handlers/
+        userHandlers.ts
+        ...
+    handlers.js
+    browser.js
+```
+
+이제, Mocking할 API를 핸들링할 핸들러를 정의해보겠습니다.
+아래는 user 리소스에 대한 핸들러를 정의한 예시입니다.
+
+```javascript
+// src/mocks/api/handlers/userHandlers.ts
+import { HttpResponse, http } from 'msw';
+import { deleteUserRes, getUserRes, patchPasswordRes, patchUserRes } from '../data/user';
+
+export const userHandlers = [
+  http.get('/api/user', () => {
+    return HttpResponse.json(getUserRes, { status: 200 });
+  }),
+  http.delete('/api/user', () => {
+    return HttpResponse.json(deleteUserRes, { status: 200 });
+  }),
+  http.patch('/api/user', () => {
+    return HttpResponse.json(patchUserRes, { status: 200 });
+  }),
+  http.post('/api/user/password', () => {
+    return HttpResponse.json(patchPasswordRes, { status: 200 });
+  }),
+];
+```
+
+```javascript
+// src/mocks/handlers.ts
+
+export const handlers = [...userHandlers, ...authHandlers, ...interviewHandlers];
+```
+
+이제, 이 핸들러를 Mock Service Worker에서 사용할 수 있도록 주입합니다.
+
+```javascript
+// src/mocks/browser.ts
+import { setupWorker } from 'msw';
+import { handlers } from './handlers';
+
+export const worker = setupWorker(...handlers);
+```
+
+마지막으로, MSW를 실행시키기 위한 코드를 추가합니다. 환경 변수에 따라 MSW를 사용하기 위해 다음과 같이 코드를 작성했습니다.
+
+```javascript
+// src/index.tsx
+import { worker } from './mocks/browser';
+
+if (import.meta.env.VITE_NODE_ENV === 'development') {
+  const { worker } = require('./mocks/browser.ts');
+  worker.start();
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+# Mock Service Worker 활용
+
+다음과 같이 응답 상태에 따른 다양한 시나리오를 시뮬레이션할 수 있습니다.
+
+```javascript
+// 요청 값 확인 시뮬레이션
+http.get('/api/resume', ({ request }) => {
+  const url = new URL(request.url);
+  const resumeId = url.searchParams.get('resumeId');
+
+  if (!resumeId) {
+    return HttpResponse.json(null, { status: 404 });
+  }
+
+  return HttpResponse.json(resumeRes, { status: 200 });
+});
+
+// 로딩 상태 시뮬레이션
+http.get('/api/user', async ({ request }) => {
+  await delay(4000);
+  return HttpResponse.json(interviewFollowupRes, { status: 201 });
+});
+
+// 에러 상황 시뮬레이션
+http.get('/api/user', () => {
+  return HttpResponse.json({ message: 'Server error' }, { status: 500 });
+});
+
+// 빈 데이터 시뮬레이션
+http.get('/api/user', () => {
+  return HttpResponse.json([], { status: 200 }); // 빈 배열
+});
+```
+
+# 결론
+
+`Mock Service Worker`는 **프론트엔드 개발 프로세스를 크게 개선**할 수 있는 강력한 도구입니다. 백엔드 API의 준비 여부와 관계없이 프론트엔드 개발을 원활하게 진행할 수 있으며, 테스트 과정에서도 안정적인 환경을 제공합니다.
+
+MSW의 주요 장점을 요약하자면 다음과 같습니다
+
+1. **네트워크 레벨 모킹**: 코드 수정 없이 네트워크 레벨에서 모킹이 이루어져 실제 API와 가장 유사한 환경을 제공합니다.
+
+2. **개발 및 테스트 일관성**: 동일한 모킹 로직을 개발과 테스트에서 재사용할 수 있어 일관성이 유지됩니다.
+
+3. **유연성**: 다양한 응답 상태, 지연 시간, 에러 상황 등을 쉽게 시뮬레이션할 수 있습니다.
+
+프론트엔드 개발을 하면서 API 의존도를 줄이고 원활한 개발 및 테스트 환경을 구축하고 싶다면, MSW를 적극적으로 활용해보는 것을 추천합니다! 🚀
