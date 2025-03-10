@@ -1,0 +1,131 @@
+---
+title: 'JavaScript 호이스팅이란?'
+description: JavaScript의 호이스팅 개념을 이해하고 변수와 함수 선언 방식에 따른 차이를 살펴보자
+category: javascript
+emoji: 🏗️
+tags:
+  - JavaScript
+  - Hoisting
+  - Temporal Dead Zone
+  - 호이스팅
+  - TDZ
+  - 일시적 사각 지대
+  - 변수 호이스팅
+  - 함수 선언과 표현식
+date: '2024.08.15'
+fileName: 'hoisting'
+readingTime: 15
+---
+
+# 글을 시작하며
+
+`호이스팅(Hoisting)`이란 단어는 영어 단어 "hoist"에서 유래되었으며, "들어올리다", "끌어올리다"라는 의미를 가지고 있습니다. JavaScript에서 호이스팅은 **변수와 함수 선언이 코드 실행 전에 최상단으로 끌어올려지는 것처럼 동작하는 현상**을 의미합니다.
+
+이 개념을 정확히 이해하면, JavaScript의 실행 흐름을 더 명확하게 파악하고, 예상치 못한 버그를 줄일 수 있습니다. 이번 포스팅에서는 **호이스팅이 무엇인지**, **어떻게 동작하는지**, 그리고 **주의해야 할 점은 무엇인지** 자세히 살펴보겠습니다.
+
+# 호이스팅(Hoisting)이란?
+
+호이스팅(Hoisting)이란 코드가 실행되기 전에 **변수와 함수 선언이 해당 스코프의 최상단으로 끌어올려지는 것처럼 동작하는 현상**을 의미합니다.
+
+코드에서 선언된 위치보다 먼저 실행되는 것처럼 보이지만, 실제로는 자바스크립트 엔진이 변수 선언과 초기화를 분리하여 처리하기 때문에 발생하는 현상입니다.
+
+호이스팅의 주요 특징은 아래와 같습니다.
+
+- 변수와 함수 **선언은 실행 전에 메모리에 등록**되지만, 변수의 **값 할당은 원래 코드 위치에서** 실행됩니다.
+- `var` 키워드는 **선언과 동시에 undefined로 초기화**되지만, `let`과 `const`는 **초기화 단계 없이** `TDZ(Temporal Dead Zone)` **상태**에 놓이게 됩니다.
+- 함수 선언문은 코드 어디에서든 실행할 수 있지만, **함수 표현식은 변수와 동일한 호이스팅 규칙**을 따릅니다.
+
+# 변수 호이스팅(Variable Hoisting)
+
+변수의 경우, `var`과 `let`, `const`에 따라 호이스팅 방식이 다릅니다.
+
+## `var` 호이스팅
+
+```javascript
+console.log(a); // undefined
+var a = 10;
+console.log(a); // 10
+```
+
+위 코드는 다음과 같이 해석됩니다.
+
+```javascript
+var a;
+console.log(a); // undefined
+
+a = 10;
+console.log(a); // 10
+```
+
+즉, `var a;` 선언이 코드 최상단으로 올라가고, 할당(`a = 10;`)은 원래 위치에서 실행됩니다. 따라서 첫 번째 `console.log(a);`는 `undefined`를 출력합니다.
+
+## `let`과 `const`의 호이스팅
+
+`let`과 `const`도 호이스팅은 발생하지만, TDZ(Temporal Dead Zone, 일시적 사각지대) 때문에 선언 전에 접근하면 `ReferenceError`가 발생합니다.
+
+```javascript
+let foo = 1; // 전역 변수
+{
+  console.log(foo); // ReferenceError: Cannot access 'foo' before initialization
+  let foo = 2; // 지역 변수
+}
+```
+
+let 키워드로 선언한 변수가 호이스팅이 발생하지 않는다면 전역 변수 foo의 값인 1을 출력해야하지만 참조에러가 발생하게 됩니다.
+
+`var`와 달리 초기화 전에 사용할 수 없으며 호이스팅이 발생하지 않는 것 처럼 동작합니다.
+
+# 함수 호이스팅(Function Hoisting)
+
+## 함수 선언문
+
+```javascript
+sayHello(); // "Hello, world!"
+
+function sayHello() {
+  console.log('Hello, world!');
+}
+```
+
+위 코드는 정상적으로 실행됩니다. 이유는 **함수 선언문은 선언과 함께 함수 본문도 함께 호이스팅되기 때문**입니다.
+
+즉, JavaScript 엔진이 다음과 같이 처리합니다.
+
+```javascript
+function sayHello() {
+  console.log('Hello, world!');
+}
+
+sayHello(); // "Hello, world!"
+```
+
+## 함수 표현식
+
+```javascript
+sayHi(); // TypeError: sayHi is not a function
+
+var sayHi = function () {
+  console.log('Hi!');
+};
+```
+
+이 코드에서는 `sayHi`가 호이스팅되지만, **함수 자체는 호이스팅되지 않고 변수만 `undefined`로 초기화됩니다.** 따라서 `sayHi();` 호출 시 `TypeError`가 발생합니다.
+
+동일한 코드를 `let`이나 `const`로 선언하면 **ReferenceError**가 발생합니다.
+
+```javascript
+console.log(sayHi);
+let sayHi = function () {
+  console.log('Hi!');
+};
+```
+
+즉, 함수 표현식의 경우 변수 호이스팅과 동일하게 적용됩니다.
+
+# 6. 결론
+
+호이스팅은 JavaScript에서 실행 컨텍스트가 변수를 처리하는 방식에서 비롯된 개념입니다. 이를 이해하면 코드의 동작 방식을 더 명확하게 파악할 수 있습니다.
+
+특히 `let`과 `const`를 사용할 때 발생하는 `TDZ` 개념과 `var`의 예상치 못한 동작을 숙지하면 버그를 방지하는 데 큰 도움이 됩니다.
+
+이제 여러분도 호이스팅을 고려한 안전한 JavaScript 코드를 작성해보세요! 🚀
