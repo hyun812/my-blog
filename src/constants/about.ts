@@ -2,7 +2,8 @@ import { IActivity, IAward, IProject } from '@/types/about';
 
 export const introductions: string[] = [
   '더 나은 서비스 제공이라는 공통된 목표를 위해 서로의 지식을 공유하고 고민하는 개발자라는 직업에 푹 빠졌습니다.',
-  '어떻게 생산성을 개선해나갈 수 있을지 고민하는 것을 좋아하며 팀의 프로세스 및 문화를 더 나은 방향으로 개선하려는 시도를 적극적으로 합니다.',
+  '개발자의 본질은 사용자의 불편함을 해소하는 것이라고 생각합니다.',
+  `“이 기능을 추가함으로써 사용자의 어떤 문제를 해결할 수 있어?” 라는 질문을 자주 던지며 개발 방향을 정해나가고 있습니다.`,
   '원활한 커뮤니케이션, 개발자로서의 깊은 전문성, 그리고 지속적인 성장을 바탕으로 비즈니스 성공에 적극적으로 기여하는 개발자가 되고자 합니다.',
 ];
 
@@ -72,7 +73,7 @@ export const projects: IProject[] = [
       'Storybook 도입하여 독립적인 컴포넌트 개발 및 커뮤니케이션 강화',
       'MediaStream API를 활용한 면접 진행 및 녹화 핵심 기능 구현',
       'Speech-to-Text를 활용하여 질문에 대한 답변 기반 꼬리 질문 생성 로직 구현',
-      '이력서 기반 질문 생성 완료 시 SSE 실시간 알림 기능 구현',
+      '이력서 기반 질문 생성 완료 시 Server-Sent Events 실시간 알림 기능 구현',
     ],
     imageSrc: '/project/preview_logo.png',
     githubLink: 'https://github.com/d102-preview/preview',
@@ -86,7 +87,7 @@ export const projects: IProject[] = [
     skills: ['React', 'TypeScript', 'TanStack Query', 'Tailwind CSS', 'Zustand'],
     descriptions: [
       'Gerrit를 통한 커밋 단위 코드 리뷰로 명확한 변경 사항 추적 및 코드 품질 향상',
-      '상위 입찰 발생 및 라이브 방송 전 SSE 실시간 알림 기능 구현',
+      '상위 입찰 발생 및 라이브 방송 전 Server-Sent Events 실시간 알림 기능 구현',
       'iamport API를 활용하여 카카오 페이를 통한 모의 포인트 충전 구현',
       'useState를 이용하여 카테고리, 지역, 경매 상태 등 다양한 필터링 상태 관리 구현',
       '경매글 작성 구현 ( 다중 사진 등록 및 이미지 미리보기 등 )',
