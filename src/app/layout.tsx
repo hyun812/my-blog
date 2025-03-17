@@ -10,30 +10,30 @@ import { siteConfig } from '@/constants/site';
 export const metadata: Metadata = {
   title: {
     template: `%s - ${siteConfig.name}`,
-    default: `${siteConfig.name}`,
+    default: siteConfig.name,
   },
-  description: `${siteConfig.description}`,
-  robots: 'follow, index',
+  description: siteConfig.description,
+  robots: 'index, follow',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
     url: siteConfig.url,
-    title: `${siteConfig.name}`,
-    siteName: `${siteConfig.name}`,
-    description: `${siteConfig.description}`,
+    title: siteConfig.name,
+    siteName: siteConfig.name,
+    description: siteConfig.description,
     images: [
       {
         url: `${siteConfig.url}/image/profile.png`,
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name}`,
+        alt: siteConfig.name,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${siteConfig.name}`,
-    description: `${siteConfig.description}`,
+    title: siteConfig.name,
+    description: siteConfig.description,
     images: [`${siteConfig.url}/image/profile.png`],
   },
   verification: {
