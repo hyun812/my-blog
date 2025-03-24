@@ -6,8 +6,8 @@ import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
 import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
-import Head from 'next/head';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
@@ -62,7 +62,7 @@ const SnippetDetailPage = async ({ params }: Props) => {
     },
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
+      name: siteConfig.author,
       logo: {
         '@type': 'ImageObject',
         url: `${siteConfig.url}/image/logo.png`,
@@ -78,12 +78,11 @@ const SnippetDetailPage = async ({ params }: Props) => {
   if (!snippet.content || !adjacent.nextPost.content) return notFound();
   return (
     <>
-      <Head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
+      <Script
+        id="json-ld-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="h-full relative border-b pb-8">
         <PostHeader data={snippet.data} />
         <PostBody content={snippet.content} />
