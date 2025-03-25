@@ -3,7 +3,7 @@ import fs, { existsSync } from 'fs';
 import { sync } from 'glob';
 import matter from 'gray-matter';
 import path from 'path';
-import { cacheInstance } from '@/utils/cache';
+import { cacheInstance } from './cache';
 
 export type ContentType = 'posts' | 'snippets';
 const BASE_PATHS = {

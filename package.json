@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run rss && next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "rss": "ts-node --project tsconfig.node.json src/scripts/rss.ts"
   },
   "lint-staged": {
     "**/*.{tsx,ts,jsx,js}": [
@@ -19,6 +20,7 @@
     "@next/third-parties": "^15.1.6",
     "@types/glob": "^8.1.0",
     "@types/lodash": "^4.17.14",
+    "feed": "^4.2.2",
     "glob": "^11.0.0",
     "gray-matter": "^4.0.3",
     "lodash": "^4.17.21",
@@ -53,6 +55,7 @@
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
