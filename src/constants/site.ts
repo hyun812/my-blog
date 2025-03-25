@@ -3,6 +3,7 @@ export interface ISiteConfig {
   description: string;
   url: string;
   author: string;
+  email: string;
   menus: IMenus[];
 }
 
@@ -17,6 +18,7 @@ export const siteConfig: ISiteConfig = {
     'React, Next.js, JavaScript 등 웹 프론트엔드 개발과 관련된 글을 공유하는 블로그입니다. 다양한 프로젝트를 진행하며 경험한 문제 해결 과정과 학습 내용을 정리합니다.',
   url: 'https://hyun812.vercel.app',
   author: 'Lee Seung Hyun',
+  email: 'dltmdgus4802@gmail.com',
   menus: [
     {
       label: 'Hi',

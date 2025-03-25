@@ -8,32 +8,42 @@ import localFont from 'next/font/local';
 import { siteConfig } from '@/constants/site';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    template: `%s - ${siteConfig.name}`,
     default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  robots: 'index, follow',
   openGraph: {
-    type: 'website',
-    locale: 'ko_KR',
-    url: siteConfig.url,
     title: siteConfig.name,
-    siteName: siteConfig.name,
     description: siteConfig.description,
-    images: [
-      {
-        url: `${siteConfig.url}/image/profile.png`,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    images: [`${siteConfig.url}/image/profile.png`],
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  alternates: {
+    canonical: siteConfig.url,
+    types: {
+      'application/rss+xml': `${siteConfig.url}/feed.xml`,
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   twitter: {
-    card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
+    card: 'summary_large_image',
     images: [`${siteConfig.url}/image/profile.png`],
   },
   verification: {
@@ -63,6 +73,25 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        href="/feed.xml"
+        title="RSS Feed"
+      />
+      <link
+        rel="alternate"
+        type="application/atom+xml"
+        href="/atom.xml"
+        title="Atom Feed"
+      />
+      <link
+        rel="alternate"
+        type="application/json"
+        href="/feed.json"
+        title="JSON Feed"
+      />
+
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />
