@@ -8,42 +8,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const posts: MetadataRoute.Sitemap = postList.map((post) => ({
     url: `${siteConfig.url}/posts/${post.data.category}/${post.data.fileName}`,
-    lastModified: new Date(post.data.date),
+    lastModified: new Date(post.data.date).toISOString().split('T')[0],
     changeFrequency: 'daily',
   }));
 
   const snippets: MetadataRoute.Sitemap = snippetList.map((snippet) => ({
     url: `${siteConfig.url}/snippets/${snippet.data.fileName}`,
-    lastModified: new Date(snippet.data.date),
+    lastModified: new Date(snippet.data.date).toISOString().split('T')[0],
     changeFrequency: 'daily',
   }));
 
-  return [
-    {
-      url: `${siteConfig.url}`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: `${siteConfig.url}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${siteConfig.url}/posts`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${siteConfig.url}/snippets`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.5,
-    },
-    ...posts,
-    ...snippets,
-  ];
+  const routes: MetadataRoute.Sitemap = ['', 'about', 'posts', 'snippets'].map((route) => ({
+    url: `${siteConfig.url}/${route}`,
+    lastModified: new Date().toISOString().split('T')[0],
+  }));
+
+  return [...routes, ...posts, ...snippets];
 }
