@@ -5,6 +5,8 @@ import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypePrism from 'rehype-prism-plus';
 import CodeBlock from '../mdx/CodeBlock';
+import MDXImage from '../mdx/MDXImage';
+import MDXLink from '../mdx/MDXLink';
 
 interface IPostDetailProps {
   content: string;
@@ -12,6 +14,8 @@ interface IPostDetailProps {
 
 const MdxComponents = {
   pre: CodeBlock,
+  img: MDXImage,
+  a: MDXLink,
 };
 
 const PostBody = ({ content }: IPostDetailProps) => {

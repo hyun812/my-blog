@@ -40,11 +40,6 @@
   margin-top: 0.5rem;
 }
 
-.prose a {
-  @apply text-primary-300 break-words transition-all;
-  @apply underline-offset-4 pointerHover:hover:text-primary-300/70;
-}
-
 .prose code {
   font-family: var(--font-mono), Consolas, Monaco, 'Andale Mono', monospace;
 }
