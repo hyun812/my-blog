@@ -1,0 +1,102 @@
+---
+title: 'Flutter가 말을 걸었는데, React는 듣지 못했다'
+description: Flutter에서 dispatch한 커스텀 이벤트가 React에서 수신되지 않는 문제, 원인은 바로 ‘타이밍’
+category: react
+emoji: 📡
+tags:
+  - Flutter WebView
+  - React
+  - 하이브리드 앱
+  - 이벤트 타이밍 이슈
+date: '2025.06.24'
+fileName: 'flutter-webview-event'
+readingTime: 20
+---
+
+## 글을 시작하며
+
+모바일 앱 개발에서 WebView를 활용한 하이브리드 앱 구조는 개발 효율성과 유지보수성 측면에서 많은 장점을 제공합니다. 하지만 Flutter와 React 간의 통신에서 예상치 못한 문제들이 발생하곤 합니다.
+Flutter 앱 안에 WebView로 React 앱을 띄워 통신하는 구조에서, Flutter에서 발생시킨 이벤트가 React에서 수신되지 않는 문제를 겪었고
+이번 글에서는 제가 겪은 문제 상황과 해결 방법을 공유해보고자 합니다.
+
+## 문제 상황
+
+Flutter 쪽에서는 아래와 같이 window.dispatchEvent()를 사용해 해당 이벤트를 발생시키고 있었습니다
+
+```dart
+controller.runJavascript('window.dispatchEvent(new Event("flutterAuthReady"));');
+```
+
+React 측에서는 flutterAuthReady라는 이벤트를 기다리고 있었습니다.
+
+```jsx
+useEffect(() => {
+  const handleWindowAuth = () => {
+    // 이 함수가 호출되지 않는 상황
+    console.log('Flutter 인증 이벤트 수신됨');
+  };
+
+  window.addEventListener('flutterAuthReady', handleWindowAuth);
+
+  return () => {
+    window.removeEventListener('flutterAuthReady', handleWindowAuth);
+  };
+}, []);
+```
+
+React 컴포넌트에서 flutterAuthReady 이벤트를 수신하기 위해 이벤트 리스너를 등록했지만, 예상과 달리 handleWindowAuth 함수가 전혀 호출되지 않았습니다.
+
+## 문제의 원인 분석
+
+이 문제의 핵심은 이벤트 타이밍에 있었습니다. Flutter에서 WebView가 로드되면서 다음과 같은 순서로 작업이 진행됩니다
+
+1. Flutter WebView가 React 앱을 로드 시작
+2. Flutter에서 즉시 flutterAuthReady 이벤트 발생
+3. React 컴포넌트가 마운트되면서 이벤트 리스너 등록
+
+즉, React 컴포넌트가 마운트되어 이벤트 리스너를 등록하기 전에 Flutter에서 이미 이벤트를 발생시켜버린 상황이었습니다. 이미 발생한 이벤트는 다시 발생하지 않기 때문에, 나중에 등록된 이벤트 리스너는 해당 이벤트를 수신할 수 없게 됩니다.
+
+예시 타임라인:
+0ms - Flutter WebView 시작
+50ms - Flutter에서 flutterAuthReady 이벤트 발생 X
+100ms- React 앱 로딩 완료
+150ms- React 컴포넌트 마운트
+200ms- useEffect 실행, 이벤트 리스너 등록 (이미 늦음)
+
+## 해결방법: 이벤트 수신 대신 "상태 확인" 방식으로 변경
+
+커스텀 이벤트는 한 번 발생하면 끝이기 때문에, 시점이 안 맞으면 loss 됩니다.
+이 문제를 해결하기 위해 React가 명시적으로 상태를 가져오는 방식으로 구조를 바꿨습니다.
+
+1. Flutter에서 상태를 객체로 전달하도록 변경
+
+```dart
+controller.runJavascript('window.flutterAuth = { isReady: true, userData: {/* 사용자 데이터 */} }');
+```
+
+2. React에서는 useEffect 내에서 직접 상태를 체크
+
+```jsx
+useEffect(() => {
+  const checkFlutterAuth = () => {
+    if (window.flutterAuth?.isReady) {
+      console.log('Flutter 인증 상태 확인됨:', window.flutterAuth);
+      // 인증 완료 처리 로직
+      return;
+    }
+
+    // 아직 준비되지 않았다면 잠시 후 다시 확인
+    setTimeout(checkFlutterAuth, 100);
+  };
+
+  checkFlutterAuth();
+}, []);
+```
+
+window 객체의 경우 브라우저가 꺼질 때까지 계속 살아있는 전역 저장소입니다. Flutter가 window.flutterAuth에 데이터를 저장하면, React에서도 언제든 그 데이터에 접근 가능하므로 이벤트 타이밍과 관계없이 React 측에서 명확한 상태를 확인할 수 있는 구조가 됩니다.
+
+## 결론
+
+React를 WebView로 띄워 Flutter와 통신하는 구조에서는, **시점**이 매우 중요합니다
+이런 문제들을 미리 예상하고 견고한 통신 구조를 설계한다면, Flutter와 React의 조합으로 안정적이고 효율적인 하이브리드 앱을 개발할 수 있습니다.
+이 글이 저와 비슷한 상황에 계신 분들께 조금이라도 도움이 되었으면 합니다.
