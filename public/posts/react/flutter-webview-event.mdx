@@ -57,11 +57,13 @@ React 컴포넌트에서 flutterAuthReady 이벤트를 수신하기 위해 이�
 즉, React 컴포넌트가 마운트되어 이벤트 리스너를 등록하기 전에 Flutter에서 이미 이벤트를 발생시켜버린 상황이었습니다. 이미 발생한 이벤트는 다시 발생하지 않기 때문에, 나중에 등록된 이벤트 리스너는 해당 이벤트를 수신할 수 없게 됩니다.
 
 예시 타임라인:
-0ms - Flutter WebView 시작
-50ms - Flutter에서 flutterAuthReady 이벤트 발생 X
-100ms- React 앱 로딩 완료
-150ms- React 컴포넌트 마운트
-200ms- useEffect 실행, 이벤트 리스너 등록 (이미 늦음)
+| 시간 | 단계 설명 |
+| ------- | ------------------------------------------- |
+| `0ms` | Flutter WebView 시작 |
+| `50ms` | Flutter에서 `flutterAuthReady` 이벤트 발생 |
+| `100ms` | React 앱 로딩 완료 |
+| `150ms` | React 컴포넌트 마운트 |
+| `200ms` | `useEffect` 실행 → 이벤트 리스너 등록 (이미 이벤트 놓침) |
 
 ## 해결방법: 이벤트 수신 대신 "상태 확인" 방식으로 변경
 
