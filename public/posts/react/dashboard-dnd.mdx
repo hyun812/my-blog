@@ -57,7 +57,7 @@ readingTime: 25
 
 따라서 absolute positioning을 기반으로 한 커스텀 그리드 시스템을 구현하기로 결정했습니다:
 
-## 드래그 앤 드롭 상태 관리
+## 상태 관리
 
 위젯의 두 가지 드래그 상태를 구분하여 관리했습니다.
 
@@ -83,7 +83,7 @@ export function useDashboard({ placedWidgets, setPlacedWidgets, dashboardRef }: 
 - `draggedPlacedWidget`: 대시보드에서 드래그하는 기존 위젯
 - `dropIndicator`: 드롭 위치를 시각적으로 표시하는 인디케이터
 
-## 드래그 앤 드롭 이벤트 처리
+## 이벤트 처리
 
 분리한 상태를 기반으로 이벤트 처리를 진행했습니다.
 
@@ -106,32 +106,6 @@ const handlePlacedWidgetDragStart = useCallback(
     setDraggedPlacedWidget(widget);
   },
   [isEditMode],
-);
-```
-
-### 드래그 중 처리
-
-드롭 위치를 미리 보여주는 인디케이터 구현에 활용
-
-```typescript
-const handleDragOver = useCallback(
-  (e: React.DragEvent) => {
-    e.preventDefault();
-
-    if (!draggedPlacedWidget) return;
-
-    const insertIndex = findInsertPosition(e.clientX, e.clientY);
-    const indicatorPos = getDropIndicatorPosition(insertIndex);
-
-    if (indicatorPos) {
-      setDropIndicator({
-        position: insertIndex,
-        x: indicatorPos.x,
-        y: indicatorPos.y,
-      });
-    }
-  },
-  [draggedPlacedWidget, findInsertPosition, getDropIndicatorPosition],
 );
 ```
 
@@ -169,6 +143,32 @@ const handleDrop = useCallback(
     setDraggedPlacedWidget(null);
   },
   [draggedWidget, draggedPlacedWidget, findInsertPosition, setPlacedWidgets],
+);
+```
+
+### 드래그 중 처리
+
+드롭 위치를 미리 보여주는 인디케이터 구현에 활용
+
+```typescript
+const handleDragOver = useCallback(
+  (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (!draggedPlacedWidget) return;
+
+    const insertIndex = findInsertPosition(e.clientX, e.clientY);
+    const indicatorPos = getDropIndicatorPosition(insertIndex);
+
+    if (indicatorPos) {
+      setDropIndicator({
+        position: insertIndex,
+        x: indicatorPos.x,
+        y: indicatorPos.y,
+      });
+    }
+  },
+  [draggedPlacedWidget, findInsertPosition, getDropIndicatorPosition],
 );
 ```
 
@@ -287,24 +287,6 @@ const getDropIndicatorPosition = useCallback(
   },
   [dashboardRef, widgetPositions, gridDimensions],
 );
-```
-
-## 반응형 그리드 시스템
-
-화면 크기에 따라 그리드 차원을 동적으로 계산합니다.
-
-```typescript
-useEffect(() => {
-  const calculateGridDimensions = () => {
-    const { usableWidth, usableHeight } = calculateUsableSpace(isEditMode);
-    setGridDimensions(createGridDimensions(usableWidth, usableHeight));
-  };
-
-  calculateGridDimensions();
-  window.addEventListener('resize', calculateGridDimensions);
-
-  return () => window.removeEventListener('resize', calculateGridDimensions);
-}, [isEditMode]);
 ```
 
 # 결론
