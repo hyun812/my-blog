@@ -1,0 +1,314 @@
+---
+title: '"왜 직접 만들었을까?" – 복잡한 그리드 위젯 Drag & Drop 기능'
+description: 복잡한 대시보드 Drag & Drop 기능을 구현한 방법에 대해 알아보자
+category: react
+emoji: 📐
+tags:
+  - React
+  - Drag & Drop
+  - Dashboard
+  - 대시보드
+  - 그리드 시스템
+  - 동적 크기
+  - 위젯
+date: '2025.06.03'
+fileName: 'dashboard-dnd'
+readingTime: 25
+---
+
+# 글을 시작하며
+
+최근 프로젝트에서 대시보드에 위젯을 자유롭게 배치하고 순서를 변경할 수 있는 기능을 구현해야했습니다.
+
+대시보드 구현에 널리 사용되는 라이브러리들을 검토해봤지만, 원하는 요구사항을 완벽히 만족하지는 못했습니다.
+
+기존 라이브러리로는 한계가 있다고 판단했고 결국, 우리 서비스에 맞는 사용자 경험을 제공하기 위해 직접 구현하게 되었습니다.
+
+이번 글에서는 그 이유와 구현 과정을 단계별로 정리해보고자 합니다.
+
+# 직접 구현한 이유
+
+요구사항은 다음과 같았습니다.
+
+1. 사이드바에서 위젯 Drag & Drop 으로 추가
+
+2. 그리드 기반 사용자가 위젯을 드롭하는 위치에 따라 자동 배치
+
+3. 왼쪽 상단부터 차곡차곡 쌓이는 방식 (빈 공간을 최소화)
+
+4. 위젯마다 크기가 다름 (예: 1x1, 1x2, 2x2 등)
+
+5. 실시간 드롭 위치 미리보기
+
+6. 편집 모드에서만 수정 가능
+
+`react-grid-layout`, `dnd-kit`, `react-beautiful-dnd` 등 주요 드래그 앤 드롭 라이브러리들을 종합적으로 검토해보았으나 요구사항은 단순한 리스트 정렬 이상의 로직을 필요로 했고, 특히 다양한 크기의 위젯을 빈틈 없이 자동으로 배치하는 기능은 라이브러리의 기본 기능으로는 구현하기 어려웠습니다.
+이에 직접 구현하자는 결론을 내리게 됐습니다.
+
+# 어떻게 구현했는가
+
+## CSS Grid 방식의 한계
+
+처음에는 CSS Grid의 `grid-column: span 2`, `grid-row: span 2`와 같은 속성을 활용하는 방법을 고려했습니다. 하지만 동적인 드래그 앤 드롭 구현에는 몇 가지 제약사항이 있었습니다.
+
+1. 실시간 위치 계산의 어려움: 드래그 중 마우스 위치에 따른 삽입 위치를 실시간으로 계산하기 복잡
+2. 시각적 피드백 제공의 어려움: 드롭 위치를 미리 보여주는 인디케이터 구현이 어려움
+3. 유연하지 못한 레이아웃: 위젯 크기와 위치를 동적으로 조정하는 데 한계
+
+따라서 absolute positioning을 기반으로 한 커스텀 그리드 시스템을 구현하기로 결정했습니다:
+
+## 드래그 앤 드롭 상태 관리
+
+위젯의 두 가지 드래그 상태를 구분하여 관리했습니다.
+
+```typescript
+export function useDashboard({ placedWidgets, setPlacedWidgets, dashboardRef }: UseDashboardProps) {
+  const [isEditMode] = useAtom(dashBoardEditModeAtom);
+
+  // 그리드 차원 정보
+  const [gridDimensions, setGridDimensions] = useState<GridDimensions>(
+    INITIAL_GRID_DIMENSIONS
+  );
+
+  // 드래그 상태 관리
+  const [draggedWidget, setDraggedWidget] = useState<Widget | null>(null);
+  const [draggedPlacedWidget, setDraggedPlacedWidget] = useState<Widget | null>(null);
+  const [dropIndicator, setDropIndicator] = useState<DropIndicator | null>(null);
+
+  ...
+}
+```
+
+- `draggedWidget`: 사이드바에서 드래그하는 새로운 위젯
+- `draggedPlacedWidget`: 대시보드에서 드래그하는 기존 위젯
+- `dropIndicator`: 드롭 위치를 시각적으로 표시하는 인디케이터
+
+## 드래그 앤 드롭 이벤트 처리
+
+분리한 상태를 기반으로 이벤트 처리를 진행했습니다.
+
+### 드래그 시작
+
+```typescript
+// 사이드바 위젯 드래그 시작
+const handleSidebarDragStart = useCallback(
+  (e: React.DragEvent, widget: Widget) => {
+    if (!isEditMode) return;
+    setDraggedWidget(widget);
+  },
+  [isEditMode],
+);
+
+// 배치된 위젯 드래그 시작
+const handlePlacedWidgetDragStart = useCallback(
+  (e: React.DragEvent, widget: Widget) => {
+    if (!isEditMode) return;
+    setDraggedPlacedWidget(widget);
+  },
+  [isEditMode],
+);
+```
+
+### 드래그 중 처리
+
+드롭 위치를 미리 보여주는 인디케이터 구현에 활용
+
+```typescript
+const handleDragOver = useCallback(
+  (e: React.DragEvent) => {
+    e.preventDefault();
+
+    if (!draggedPlacedWidget) return;
+
+    const insertIndex = findInsertPosition(e.clientX, e.clientY);
+    const indicatorPos = getDropIndicatorPosition(insertIndex);
+
+    if (indicatorPos) {
+      setDropIndicator({
+        position: insertIndex,
+        x: indicatorPos.x,
+        y: indicatorPos.y,
+      });
+    }
+  },
+  [draggedPlacedWidget, findInsertPosition, getDropIndicatorPosition],
+);
+```
+
+### 드롭 처리
+
+```typescript
+const handleDrop = useCallback(
+  (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropIndicator(null);
+
+    // 사이드바에서 새 위젯 추가 (맨 뒤에 추가)
+    if (draggedWidget) {
+      const newWidget: Widget = {
+        ...draggedWidget,
+        id: `${draggedWidget.id}-${Date.now()}`,
+      };
+
+      if (placedWidgets.find((prev) => prev.name === newWidget.name)) {
+        // 같은 위젯이 이미 존재
+      } else setPlacedWidgets((prev) => [...prev, newWidget]);
+    } else if (draggedPlacedWidget) {
+      // 기존 위젯 순서 변경
+      const insertIndex = findInsertPosition(e.clientX, e.clientY);
+      setPlacedWidgets((prev) => {
+        const filtered = prev.filter((w) => w.id !== draggedPlacedWidget.id);
+        const result = [...filtered];
+        result.splice(insertIndex, 0, draggedPlacedWidget);
+
+        return result;
+      });
+    }
+
+    setDraggedWidget(null);
+    setDraggedPlacedWidget(null);
+  },
+  [draggedWidget, draggedPlacedWidget, findInsertPosition, setPlacedWidgets],
+);
+```
+
+### 드래그 영역 벗어날 때 처리
+
+```typescript
+const handleDragLeave = useCallback(
+  (e: React.DragEvent) => {
+    // 대시보드 영역을 완전히 벗어났을 때만 인디케이터 숨김
+    if (!dashboardRef.current?.contains(e.relatedTarget as Node)) {
+      setDropIndicator(null);
+    }
+  },
+  [dashboardRef],
+);
+```
+
+## 삽입 위치 계산
+
+가장 핵심적인 부분은 마우스 위치에서 삽입 위치를 찾는 로직입니다.
+
+```typescript
+const findInsertPosition = useCallback(
+  (clientX: number, clientY: number) => {
+    if (!dashboardRef.current || widgetPositions.length === 0) return 0;
+
+    const rect = dashboardRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top + dashboardRef.current.scrollTop;
+
+    // 각 위젯의 경계와 비교하여 삽입 위치 찾기
+    for (let i = 0; i < widgetPositions.length; i++) {
+      const position = widgetPositions[i];
+      const bounds = getWidgetBounds(position, gridDimensions);
+
+      if (!isPointInWidgetBounds(x, y, bounds)) continue;
+      if (x < bounds.centerX) return i;
+
+      const nextPosition = widgetPositions[i + 1];
+      if (nextPosition?.x === position.x) continue;
+
+      return i + 1;
+    }
+
+    return widgetPositions.length;
+  },
+  [dashboardRef, widgetPositions, gridDimensions],
+);
+```
+
+아래는 삽입 위치를 찾기 위해 활용되는 util 함수입니다.
+
+```typescript
+// 위젯의 경계 영역 좌표 계산
+export const getWidgetBounds = (position: WidgetPosition, gridDimensions: GridDimensions) => {
+  const { cellWidth, cellHeight } = gridDimensions;
+  const left = position.x * (cellWidth + GRID_GABS);
+  const top = position.y * (cellHeight + GRID_GABS);
+  const width = position.widget.width * cellWidth + (position.widget.width - 1) * GRID_GABS;
+  const height = position.widget.height * cellHeight + (position.widget.height - 1) * GRID_GABS;
+
+  return {
+    left,
+    top,
+    right: left + width,
+    bottom: top + height,
+    centerX: left + width / 2,
+  };
+};
+
+// 좌표(x, y)가 위젯의 경계 안에 포함되는지 여부 반환
+export const isPointInWidgetBounds = (x: number, y: number, bounds: ReturnType<typeof getWidgetBounds>) => {
+  return y >= bounds.top && y <= bounds.bottom && x >= bounds.left && x <= bounds.right;
+};
+```
+
+해당 로직의 핵심은 아래와 같습니다.
+
+1. 마우스 위치가 어떤 위젯 영역에 있는지 확인
+2. 위젯의 중심선을 기준으로 앞/뒤 판단
+3. 같은 행의 위젯들을 고려하여 정확한 삽입 위치 계산
+
+## 드롭 인디케이터 시각화
+
+사용자가 드래그하는 동안 어디에 드롭될지 미리 보여주는 인디케이터를 구현했습니다.
+
+```typescript
+const getDropIndicatorPosition = useCallback(
+  (insertIndex: number) => {
+    if (!dashboardRef.current) return null;
+    if (insertIndex === 0) return { x: 0, y: 0 };
+
+    // 맨 마지막 위치
+    if (insertIndex >= widgetPositions.length) {
+      const lastPos = widgetPositions[widgetPositions.length - 1];
+      const x = (lastPos.x + lastPos.widget.width) * (gridDimensions.cellWidth + GRID_GABS);
+      const y = lastPos.y * (gridDimensions.cellHeight + GRID_GABS);
+
+      // 다음 행으로 넘어가야 하는 경우
+      if (lastPos.x + lastPos.widget.width >= GRID_COLS) {
+        return {
+          x: 0,
+          y: y + lastPos.widget.height * gridDimensions.cellHeight + (lastPos.widget.height - 1) * GRID_GABS,
+        };
+      }
+
+      return { x, y };
+    }
+
+    // 중간 위치
+    const pos = widgetPositions[insertIndex];
+    return {
+      x: pos.x * (gridDimensions.cellWidth + GRID_GABS),
+      y: pos.y * (gridDimensions.cellHeight + GRID_GABS),
+    };
+  },
+  [dashboardRef, widgetPositions, gridDimensions],
+);
+```
+
+## 반응형 그리드 시스템
+
+화면 크기에 따라 그리드 차원을 동적으로 계산합니다.
+
+```typescript
+useEffect(() => {
+  const calculateGridDimensions = () => {
+    const { usableWidth, usableHeight } = calculateUsableSpace(isEditMode);
+    setGridDimensions(createGridDimensions(usableWidth, usableHeight));
+  };
+
+  calculateGridDimensions();
+  window.addEventListener('resize', calculateGridDimensions);
+
+  return () => window.removeEventListener('resize', calculateGridDimensions);
+}, [isEditMode]);
+```
+
+# 결론
+
+외부 라이브러리 없이 직접 구현한 드래그 앤 드롭 시스템은 매우 복잡했습니다. 더 많은 시간과 테스트가 필요했고, 정답이 정해지지 않은 상황에서의 시행착오도 많았습니다.
+그러나 다양한 위젯 크기, 그리드 기반 자동 정렬, 사용자 행동에 따른 실시간 위치 탐색 등 복잡한 요구사항을 정밀하게 분석하고, 단계별로 접근함으로써 부족함 없이 구현할 수 있었습니다.
+혹시라도 이해하기 어렵거나 틀린부분이 있다면 댓글로 남겨주시면 감사하겠습니다.
