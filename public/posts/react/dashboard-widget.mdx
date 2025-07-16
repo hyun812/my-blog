@@ -1,0 +1,185 @@
+---
+title: 확장 가능한 위젯 구조, 어떻게 설계했을까?
+description: 위젯이 늘어나는 상황에서도 구조가 깨지지 않도록 설계한 컴포넌트 전략
+category: react
+emoji: 🖼️
+tags:
+  - React
+  - 컴포넌트 섶계
+  - 위젯
+  - 대시보드
+  - 확장성
+  - 유지보수성
+  - 재사용성
+  - 프론트엔드 설계 전략
+  - 트레이드오프
+date: '2025.06.05'
+fileName: 'dashboard-widget'
+readingTime: 20
+---
+
+# 글을 시작하며
+
+대시보드 위젯 시스템을 설계하면서 가장 먼저 떠올린 질문은 이것이었습니다.
+
+> "새로운 유형의 위젯이 계속해서 추가되어도 구조가 무너지지 않으려면, 어떻게 설계해야 할까?"
+
+처음엔 빠른 구현을 위해 하드코딩이나 조건 분기를 통해 구현할 수도 있었지만, 이런 설계는 기능이 늘어날수록 유지보수 비용이 기하급수적으로 증가합니다.
+
+단기적인 편의만 추구한 설계는 장기적으로 더 큰 비용을 치르게 만든다고 생각했기때문에, 저는 변화에 강하고, 쉽게 유지보수할 수 있는 구조를 목표로 설계했습니다.
+이번 글에서는 그 구조와 설계 방법을 실제 코드와 함께 소개해보고자 합니다.
+
+# 설계 구조
+
+현재 위젯의 공통 기능은 삭제 버튼과 드래그 이벤트 정도로 제한적입니다. 하지만 앞으로 위젯 리사이징, 위젯 잠금/고정 기능 등 더 다양한 공통 기능이 추가될 가능성이 높다고 판단했습니다.
+
+이에 대비하여, 모든 위젯에 공통적으로 적용되는 기능과 UI 요소를 `BaseWidget`으로 추상화해 관리하도록 설계했습니다. 이로써 공통 기능을 한 곳에서 유지보수할 수 있으며, 기능이 확장되더라도 기존 위젯 구현을 일일이 수정하지 않아도 됩니다.
+
+또한 현재는 `university_info`, `job_info` 등 6가지 위젯만 존재하지만, 서비스 확장에 따라 다양한 유형의 위젯이 지속적으로 추가될 수 있음을 고려했습니다. 이를 위해 각 위젯을 ID로 식별하고 해당 ID에 대응하는 컴포넌트를 `WIDGET_COMPONENTS`에 매핑하는 방식으로 설계했습니다.
+
+이 구조 덕분에 새로운 위젯은 해당 컴포넌트만 구현한 뒤 추가만 하면 곧바로 대시보드에 통합할 수 있어, **코드의 확장성과 일관성을 동시에 확보**할 수 있습니다.
+
+## 1. 컴포넌트 매핑
+
+```typescript
+export const WIDGET_COMPONENTS = {
+  university_info: UniversityWidget,
+  job_info: JobWidget,
+  mindmap: MindMapWidget,
+  book_content: BookContentWidget,
+  youtube_content: YoutubeContentWidget,
+  education_content: EducationContentWidget,
+} as const;
+```
+
+- 위젯을 고유 ID로 식별하고, 해당 ID에 대응하는 실제 컴포넌트를 매핑합니다.
+- 렌더링 시 위젯 ID를 기반으로 컴포넌트를 동적으로 결정하므로, 새로운 위젯이 생기면 이 객체에만 추가하면 됩니다.
+
+## 2. 위젯 메타정보 정의
+
+```typescript
+export const WIDGET_TEMPLATES: Omit<Widget, "widget_id">[] = [
+  {
+    id: "university_info",
+    category: WIDGET_CATEGORIES.CAREER,
+    name: "대학",
+    width: 1,
+    height: 1,
+  },
+  ...
+];
+```
+
+- 위젯의 크기, 이름, 카테고리를 정의한 정적 템플릿입니다.
+- 사용자가 위젯을 추가할 때 선택할 수 있는 위젯 리스트의 역할을 하며, 위젯 배치 UI에서도 활용됩니다.
+
+## 3. 공통 UI Wrapper
+
+위젯의 크기/위치 지정, 삭제 버튼, 드래그 이벤트, 공통 스타일링 등은 모든 위젯에 반복적으로 들어가는 로직입니다.
+
+이러한 공통 요소를 각 위젯마다 개별적으로 구현하면 유지보수가 어렵고 중복 코드가 발생하기 때문에, 모든 위젯의 껍데기 역할을 하는 BaseWidget 이라는 공통 Wrapper 컴포넌트를 만들어 해당 기능들을 한 곳에서 관리했습니다.
+
+```typescript
+export const BaseWidget = ({
+  widget,
+  left,
+  top,
+  width,
+  height,
+  onPlacedWidgetDragStart,
+  onRemoveWidget,
+  children,
+}: BaseWidgetProps) => {
+  const [isEditMode] = useAtom(dashBoardEditModeAtom);
+
+  if (isEditMode)
+    return (
+      <div
+        draggable={isEditMode}
+        onDragStart={(e) => onPlacedWidgetDragStart(e, widget)}
+        className={`${
+          isEditMode ? "cursor-move hover:scale-[1.02]" : "cursor-auto"
+        } absolute bg-white shadow-xl rounded-2xl`}
+        style={{
+          left: `${left}px`,
+          top: `${top}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
+      >
+        <button
+          onClick={() => onRemoveWidget(widget.id)}
+          className={`absolute -top-3 -left-3 bg-primary cursor-pointer text-white rounded-full w-6 h-6 flex items-center justify-center  z-10 shadow-md`}
+        >
+          <X size={12} />
+        </button>
+        <div className="w-full h-full flex flex-col justify-between p-4">
+          <div className="p-4 h-full flex flex-col items-center justify-center gap-2">
+            <span className="text-sm font-semibold text-gray-800">
+              {widget.name}
+            </span>
+            <span className="text-xs text-green-600 mt-1 bg-green-50 px-2 py-1 rounded-full">
+              {widget.width}x{widget.height}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+
+  return (
+    <div
+      className={`absolute bg-white shadow-xl rounded-lg p-4`}
+      style={{
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+```
+
+- 편집 모드 여부에 따라 렌더링 분기
+
+  - `isEditMode`가 true일 때는 드래그 및 삭제 버튼이 노출되며, 사용자 편집을 허용합니다.
+  - 편집 모드가 아닐 경우, 콘텐츠를 렌더링합니다.
+
+- 위젯의 위치와 크기를 `props`로 받아 해당 위치에 배치
+
+- 공통 스타일(테두리, 그림자, 둥근 모서리, padding 등)을 통일되게 관리
+
+- 실제 위젯 콘텐츠는 `children`으로 주입하여 유연성 확보
+
+```typescript
+const id = widget.id.substring(0, widget.id.lastIndexOf("-"));
+const WidgetComponent = WIDGET_COMPONENTS[id as keyof typeof WIDGET_COMPONENTS];
+
+return (
+  <BaseWidget ...>
+    <WidgetComponent />
+  </BaseWidget>
+);
+```
+
+# 확장성과 유지보수성
+
+이 구조의 핵심은 아래와 같습니다.
+
+- 추후 기본 위젯 구조나 기능(예: 삭제, 드래그, 스타일 등)을 변경해야할때 `BaseWidget` 하나만 수정하면 전체 위젯에 반영됩니다.
+
+- 새로운 위젯을 추가할 때는 해당 컴포넌트를 구현하고 `WIDGET_COMPONENTS` 객체에 추가만 하면 되기 때문에, 기능을 새로 구현할 필요가 없습니다.
+
+- 새로운 위젯을 추가한다고 해서 기존 코드를 수정할 필요 없이 확장할 수 있습니다.
+
+즉, 공통 기능을 추상화해두었기 때문에, 위젯이 늘어나도 고민할 것은 그 안의 콘텐츠뿐입니다.
+
+# 결론
+
+이렇게 설계한 덕분에 구조를 수정하지 않고도 유연하게 확장 가능한 시스템을 만들 수 있었고, 이는 장기적인 생산성과 유지보수성 측면에서 큰 이점이 되었습니다.
+
+물론 처음부터 이런 구조를 적용하는 건 구현 난이도나 설계 시간이 다소 올라갈 수 있습니다.
+하지만 변화에 유연하게 대응할 수 있는 시스템을 만들기 위한 투자라고 본다면 충분히 감수할 만한 트레이드오프였습니다.
+단기 편의와 장기 유연성 사이에서 어떤 선택이 프로젝트에 더 적합한지를 고민하고 설계하는 것이 핵심이지 않을까 생각합니다.
