@@ -19,7 +19,20 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     url: siteConfig.url,
     siteName: siteConfig.name,
-    images: [`${siteConfig.url}/image/profile.png`],
+    images: [
+      {
+        url: `${siteConfig.url}/image/profile.png`,
+        width: 1200,
+        height: 630,
+        alt: siteConfig.name,
+      },
+      {
+        url: `${siteConfig.url}/image/logo.png`,
+        width: 800,
+        height: 600,
+        alt: `${siteConfig.name} 로고`,
+      },
+    ],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -52,6 +65,18 @@ export const metadata: Metadata = {
       'naver-site-verification': '53a920b235d61ec40c1a14f9488d8c13ad72c659',
     },
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 const pretendard = localFont({
@@ -70,7 +95,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ko"
       suppressHydrationWarning
     >
       <link
