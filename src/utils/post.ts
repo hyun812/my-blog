@@ -3,7 +3,6 @@ import fs, { existsSync } from 'fs';
 import { sync } from 'glob';
 import matter from 'gray-matter';
 import path from 'path';
-import { cacheInstance } from './cache';
 
 export type ContentType = 'posts' | 'snippets';
 const BASE_PATHS = {
@@ -13,12 +12,8 @@ const BASE_PATHS = {
 
 // 콘텐츠에 맞는 MDX 파일 경로 조회
 export const getMDXFilePaths = (content: ContentType) => {
-  const cachedPaths = cacheInstance.paths.get(content);
-  if (cachedPaths) return cachedPaths;
-
   const contentPath = content === 'posts' ? `${BASE_PATHS[content]}/**` : BASE_PATHS[content];
   const paths = sync(`${contentPath}/**/*.mdx`);
-  cacheInstance.paths.set(content, paths);
 
   return paths;
 };
@@ -36,19 +31,16 @@ export const getMDXFileList = async (content: ContentType) => {
 };
 
 // 포스트 파일 파싱
-export const parsePost = (postPath: string): Post => {
-  const cachedPost = cacheInstance.posts.get(postPath);
-  if (cachedPost) return cachedPost;
-
+export const parsePost = async (postPath: string): Promise<Post> => {
   if (!existsSync(postPath)) {
+    console.warn(`Post file not found: ${postPath}`);
     return DEFAULT_POST_DATA;
   }
 
   try {
-    const file = fs.readFileSync(postPath, 'utf8');
+    const file = await fs.promises.readFile(postPath, 'utf8');
     const { data, content } = matter(file);
 
-    cacheInstance.posts.set(postPath, { data: data as Post['data'], content });
     return {
       data: data as Post['data'],
       content,
