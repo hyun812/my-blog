@@ -8,7 +8,7 @@ tags:
   - React
   - 하이브리드 앱
   - 이벤트 타이밍 이슈
-date: '2025.06.24'
+date: '2025.06.05'
 fileName: 'flutter-webview-event'
 readingTime: 20
 ---
@@ -73,7 +73,7 @@ React 컴포넌트에서 flutterAuthReady 이벤트를 수신하기 위해 이�
 1. Flutter에서 상태를 객체로 전달하도록 변경
 
 ```dart
-controller.runJavascript('window.flutterAuth = { isReady: true, userData: {/* 사용자 데이터 */} }');
+controller.runJavascript('window.flutterAuth = { isReady: true, {/* 필요한 데이터 */} }');
 ```
 
 2. React에서는 useEffect 내에서 직접 상태를 체크
@@ -82,13 +82,11 @@ controller.runJavascript('window.flutterAuth = { isReady: true, userData: {/* �
 useEffect(() => {
   const checkFlutterAuth = () => {
     if (window.flutterAuth?.isReady) {
-      console.log('Flutter 인증 상태 확인됨:', window.flutterAuth);
       // 인증 완료 처리 로직
-      return;
+      console.log('Flutter 인증 상태 확인됨:', window.flutterAuth);
+    } else {
+      // 인증 상태가 아직 준비되지 않은 경우
     }
-
-    // 아직 준비되지 않았다면 잠시 후 다시 확인
-    setTimeout(checkFlutterAuth, 100);
   };
 
   checkFlutterAuth();
