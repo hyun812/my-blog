@@ -1,0 +1,239 @@
+---
+title: 'AI 기반 면접 피드백 서비스 - preview'
+description: 실시간 녹화, 음성 인식, 꼬리 질문 생성까지 직접 구현한 모의 면접 서비스
+category: react
+emoji: 🎥
+tags:
+  - React
+  - MediaStream
+  - MediaRecorder
+  - 면접서비스
+  - 실시간녹화
+  - STT
+date: '2024.12.13'
+fileName: 'interview-project'
+readingTime: 25
+---
+
+# 글을 시작하며
+
+취업준비생에게 도움을 주고자 실제 면접을 대비할 수 있는 서비스를 기획하게 됐습니다.
+
+주요 기능으로는 이력서를 기반으로 한 질문 생성, 실전 면접 연습 및 녹화, 음성 인식(STT), 꼬리 질문 생성, 답변 분석 리포트 등 다양한 기능을 구현해야 했습니다.
+
+그중 저는 실제 면접처럼 카메라와 마이크를 활용해 사용자의 답변을 녹화하고, 이를 STT로 분석한 뒤, 답변에 따라 꼬리 질문을 생성하는 실전 면접 흐름과 미디어 제어 로직을 담당했습니다.
+
+이번 글에서는 제가 맡은 면접 진행 프로세스들을 어떻게 구현했는지 상세히 소개해보고자 합니다.
+
+# 면접 프로세스 전체 흐름
+
+먼저 저희 서비스의 주요 기능인 면접 진행에 있어 어떤 단계를 거치는지 살펴보겠습니다.
+
+1. 카메라/마이크 권한 요청 및 설정
+2. 녹화 준비 및 질문 표시
+3. 카운트 다운 및 녹화 시작
+4. 실제 녹화 진행 (음성 인식 포함)
+5. 녹화 종료 및 업로드
+6. 다음 질문으로 이동 또는 면접 종료
+
+각 단계마다 UI가 다르게 구성되며, **사용자의 액션**에 따라 **상태 전환**이 발생합니다.
+
+## 사용자 흐름 기반 상태 전환
+
+이 흐름을 깔끔하게 제어하기 위해, 상태 중심의 UI 설계를 채택했습니다.
+
+```typescript
+export type recordStatusType = 'pending' | 'preparing' | 'countdown' | 'recording' | 'uploading' | 'ending';
+```
+
+각 상태의 의미는 다음과 같습니다.
+
+- pending: 카메라, 마이크 세팅
+- preparing: 질문을 받아와 녹화 대기 + 녹화 시간 선택
+- countdown: 카운트 다운 진행
+- recording: 실제 녹화 진행
+- uploading: 녹화 영상 업로드
+- ending: 전체 면접 완료
+
+이후 조건부 렌더링을 통해 상태에 따라 다른 UI를 보여주었습니다.
+
+# 모의 면접 기능 구현
+
+## 사용자 미디어 접근
+
+```typescript
+const videoRef = useRef<HTMLVideoElement>(null);
+const [stream, setStream] = useState<MediaStream | null>(null);
+
+const getMediaPermission = useCallback(async () => {
+  try {
+    const video = { audio: true, video: true };
+    const videoStream = await navigator.mediaDevices.getUserMedia(video);
+    setStream(videoStream);
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = videoStream;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}, []);
+```
+
+`navigator.mediaDevices.getUserMedia()`를 통해 사용자의 카메라와 마이크 권한을 요청합니다.
+
+성공적으로 스트림을 받아오면 `setStream`을 통해 전역 상태로 저장하고, `videoRef.current.srcObject`에 스트림을 연결해 사용자가 자기 모습을 화면에서 볼 수 있게 합니다.
+
+## 실시간 녹화
+
+```typescript
+const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+const handleStartRecording = () => {
+  setRecordedBlobs([]);
+
+  try {
+    mediaRecorderRef.current = new MediaRecorder(stream as MediaStream, {
+      mimeType: 'video/webm; codecs=vp9',
+    });
+
+    mediaRecorderRef.current.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        setRecordedBlobs((prev) => [...prev, event.data]);
+      }
+    };
+
+    mediaRecorderRef.current.start();
+  } catch (e) {
+    console.log('MediaRecorder error');
+  }
+};
+```
+
+`MediaRecorder`는 `MediaStream`을 입력받아 웹상에서 직접 비디오 녹화를 수행하는 브라우저 내장 API입니다. `ondataavailable` 이벤트를 통해 일정 시간마다 녹화된 데이터를 Blob 형태로 수집합니다.
+녹화가 종료되면 누적된 Blob 조각들을 하나의 파일로 합쳐 저장할 수 있습니다.
+
+### videoRef와 mediaRecorderRef를 분리한 이유
+
+| 목적             | 설명                                                                             |
+| ---------------- | -------------------------------------------------------------------------------- |
+| videoRef         | DOM의 `<video>` 요소에 접근해서 화면에 실시간 카메라 영상을 보여주기 위함 (UX용) |
+| mediaRecorderRef | MediaRecorder 인스턴스를 통해 녹화 기능 제어 및 데이터 수집 (기능/로직용)        |
+
+> 즉, 하나는 "화면에 보여주기 위한 DOM 제어", 다른 하나는 "녹화 기능을 위한 제어" 역할입니다. 기능이 명확히 다르기 때문에 분리해서 관리했습니다.
+
+## Speech-to-Text (음성 인식)
+
+`react-speech-kit` 라이브러리를 활용하여 구현했습니다.
+
+```typescript
+const [stt, setStt] = useState('');
+const [isListening, setIsListening] = useState(false);
+
+const { listen, stop, isSupported } = useSpeechRecognition({
+  onResult: (result: string) => {
+    setStt((prev) => prev + ' ' + result);
+  },
+  interimResults: false,
+});
+```
+
+| 단계         | 설명                                            |
+| ------------ | ----------------------------------------------- |
+| 녹화 시작    | `listen()` 호출 → 음성 인식 시작                |
+| 녹화 진행 중 | 사용자의 음성이 `onResult`를 통해 문자열로 변환 |
+| 녹화 종료    | `stop()` 호출 → 최종 STT 데이터 확보            |
+| 후처리       | `stt` 상태를 분석 API 요청에 활용               |
+
+녹화와 동시에 사용자의 음성을 받아 텍스트로 변환합니다.
+
+변환된 텍스트는 stt 상태에 저장되고, 분석 및 꼬리 질문 생성에 활용했습니다.
+
+## 녹화 종료
+
+MediaRecorder API의 경우 무조건 Blob으로 출력되기 때문에 이를 서버로 보낼때는 File로 변환했습니다.
+
+```typescript
+const handleUpload = async () => {
+  if (!recordedBlobs.length) return;
+
+  const time = getCurrentTime();
+  const filename = questionIndex + '_' + time + '.mp4';
+  const videoFile = convertBlobToFile(recordedBlobs, filename);
+
+  ...
+
+  const formData = new FormData();
+  const json = JSON.stringify(req);
+
+  formData.append('analysisRequestDto', json);
+  formData.append('video', videoFile);
+
+  postInterviewAnalyze(formData);
+};
+```
+
+## 꼬리질문
+
+```typescript
+if (state.type === 'main' && questionList[questionIndex].type === 'resume') {
+  const req = {
+    answer: stt,
+    question: questionList[questionIndex].question,
+  };
+  setIsFollowup(true);
+  postFollowupQuestion(req);
+}
+```
+
+특정 질문 타입에 대해서만 사용자의 답변을 바탕으로 꼬리질문을 요청합니다.
+
+```typescript
+const newData = [...questionList]; // 기존 데이터를 복사
+
+const req: IInterviewQuestionItem = {
+  question: followupQuestion.data.followUpQuestion.question,
+  type: 'followup',
+  keywordList: [],
+};
+newData.splice(questionIndex, 0, req); // 꼬리질문을 다음 위치에 삽입
+
+setQuestionList(newData);
+setIsFollowup(false);
+```
+
+## 미디어 스트림 초기화 및 정리
+
+면접 페이지에 진입했을 때, 사용자의 카메라와 마이크에 접근하고, 페이지를 떠나거나 컴포넌트가 언마운트될 경우 미디어 스트림을 종료해야 합니다.
+
+이를 위해 useEffect를 사용해 초기 렌더링 시 스트림을 설정하고, 종료 시에는 리소스를 정리해 주는 로직을 구현했습니다.
+
+```typescript
+useEffect(() => {
+  // 아직 media stream이 설정되지 않았다면 호출
+  if (!stream) {
+    getMediaPermission();
+  }
+
+  // 페이지 이탈 또는 컴포넌트 언마운트 시 미디어 스트림 정지
+  return () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+}, [stream]);
+```
+
+`stream.getTracks().forEach(track => track.stop())`을 통해 카메라와 마이크 사용을 중단시켜 자원 누수나 보안 이슈를 방지합니다.
+
+> 이 로직이 없다면, 사용자가 페이지를 나가도 카메라가 계속 켜져 있는 문제가 발생할 수 있습니다.
+
+## 마무리하며
+
+이렇게 복잡한 실전 면접 흐름을 직접 설계하고 구현하면서, 미디어 제어와 사용자 경험을 유기적으로 연결하는 중요한 개발 경험을 할 수 있었습니다.
+
+덕분에 프로젝트도 성공적으로 마무리할 수 있었고, SSAFY 프로젝트에서 최우수상을 수상하는 성과도 얻을 수 있었습니다.
+
+👇 시연 영상과 코드가 포함된 GitHub 저장소는 아래에서 확인하실 수 있습니다.
+
+[AI 기반 면접 피드백 서비스 - preview](https://github.com/d102-preview/preview)
