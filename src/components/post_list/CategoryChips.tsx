@@ -2,8 +2,10 @@
 
 import { capitalize } from 'lodash';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const CategoryChips = ({ category }: { category: string[] }) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const curCategory = searchParams.get('category');
 
@@ -15,8 +17,7 @@ const CategoryChips = ({ category }: { category: string[] }) => {
     } else {
       params.set('category', categoryName);
     }
-
-    window.history.pushState(null, '', `?${params.toString()}`);
+    router.push(`posts/?${params.toString()}`);
   };
 
   return (

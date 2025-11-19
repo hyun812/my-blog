@@ -8,7 +8,6 @@ import localFont from 'next/font/local';
 import { siteConfig } from '@/constants/site';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
   title: {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
@@ -36,27 +35,10 @@ export const metadata: Metadata = {
     locale: 'ko_KR',
     type: 'website',
   },
-  alternates: {
-    canonical: siteConfig.url,
-    types: {
-      'application/rss+xml': `${siteConfig.url}/feed.xml`,
-    },
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
   twitter: {
+    card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
-    card: 'summary_large_image',
     images: [`${siteConfig.url}/image/profile.png`],
   },
   verification: {
@@ -64,18 +46,6 @@ export const metadata: Metadata = {
     other: {
       'naver-site-verification': '53a920b235d61ec40c1a14f9488d8c13ad72c659',
     },
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
-  ],
-  formatDetection: {
-    telephone: false,
   },
 };
 
@@ -98,25 +68,6 @@ export default function RootLayout({
       lang="ko"
       suppressHydrationWarning
     >
-      <link
-        rel="alternate"
-        type="application/rss+xml"
-        href="/feed.xml"
-        title="RSS Feed"
-      />
-      <link
-        rel="alternate"
-        type="application/atom+xml"
-        href="/atom.xml"
-        title="Atom Feed"
-      />
-      <link
-        rel="alternate"
-        type="application/json"
-        href="/feed.json"
-        title="JSON Feed"
-      />
-
       <body className={`${pretendard.className}`}>
         <ThemeProvider>
           <HeaderNavigation />

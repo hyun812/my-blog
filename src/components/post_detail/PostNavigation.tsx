@@ -3,7 +3,6 @@ import Link from 'next/link';
 import ArrowLeftIcon from '@/assets/icons/arrow_left.svg';
 import ArrowRightIcon from '@/assets/icons/arrow_right.svg';
 import { ContentType } from '@/utils/post';
-import { notFound } from 'next/navigation';
 
 interface PostNavigationProps {
   adjacent: {
@@ -13,10 +12,10 @@ interface PostNavigationProps {
   content: ContentType;
 }
 
+export const dynamicParams = false;
+
 const PostNavigation = ({ adjacent, content }: PostNavigationProps) => {
   const { prevPost, nextPost } = adjacent;
-
-  if (!prevPost.content || !nextPost.content) return notFound();
 
   const getCategory = (content: ContentType, isPrev: boolean) => {
     if (content === 'snippets') return '';

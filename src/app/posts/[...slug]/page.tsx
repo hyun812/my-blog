@@ -6,12 +6,12 @@ import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
 import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
-import { notFound } from 'next/navigation';
-import Script from 'next/script';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const postList = await getMDXFileList('posts');
@@ -26,8 +26,6 @@ export const generateMetadata = async ({ params }: Props) => {
   const [category, fileName] = slug;
 
   const { data } = await getContentDetail('posts', fileName, category);
-
-  if (!data.fileName) return { title: 'Page Not Found', description: '요청하신 페이지를 찾을 수 없습니다.' };
 
   return {
     title: data.title,
@@ -52,40 +50,8 @@ const PostDetailPage = async ({ params }: Props) => {
     getAdjacentContent('posts', fileName),
   ]);
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.data.title,
-    description: post.data.description,
-    url: `${siteConfig.url}/posts/${category}/${fileName}`,
-    author: {
-      '@type': 'Person',
-      name: siteConfig.author,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: siteConfig.author,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteConfig.url}/image/logo.png`,
-      },
-    },
-    keywords: post.data.tags.join(', '),
-    datePublished: post.data.date,
-    dateModified: post.data.date,
-    articleSection: 'Technology',
-    articleTag: category,
-  };
-
-  if (!post.content || !adjacent.nextPost.content) return notFound();
-
   return (
     <>
-      <Script
-        id="json-ld-data"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <article className="h-full relative border-b pb-8">
         <PostHeader data={post.data} />
         <PostBody content={post.content} />

@@ -6,12 +6,12 @@ import PostTableOfContent from '@/components/post_detail/PostTableOfContent';
 import Tags from '@/components/post_detail/Tags';
 import { siteConfig } from '@/constants/site';
 import { getMDXFileList, getContentDetail, getAdjacentContent } from '@/utils/post';
-import { notFound } from 'next/navigation';
-import Script from 'next/script';
 
 type Props = {
   params: Promise<{ slug: string[] }>;
 };
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const snippetList = await getMDXFileList('snippets');
@@ -26,7 +26,6 @@ export const generateMetadata = async ({ params }: Props) => {
   const fileName = slug[0];
 
   const { data } = await getContentDetail('snippets', fileName);
-  if (!data.fileName) return { title: 'Page Not Found', description: '요청하신 페이지를 찾을 수 없습니다.' };
 
   return {
     title: data.title,
@@ -50,39 +49,8 @@ const SnippetDetailPage = async ({ params }: Props) => {
     getAdjacentContent('snippets', fileName),
   ]);
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: snippet.data.title,
-    description: snippet.data.description,
-    url: `${siteConfig.url}/snippets/${fileName}`,
-    author: {
-      '@type': 'Person',
-      name: siteConfig.author,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: siteConfig.author,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteConfig.url}/image/logo.png`,
-      },
-    },
-    keywords: snippet.data.tags.join(', '),
-    datePublished: snippet.data.date,
-    dateModified: snippet.data.date,
-    articleSection: 'Technology',
-    articleTag: snippet.data.tags[0],
-  };
-
-  if (!snippet.content || !adjacent.nextPost.content) return notFound();
   return (
     <>
-      <Script
-        id="json-ld-data"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <article className="h-full relative border-b pb-8">
         <PostHeader data={snippet.data} />
         <PostBody content={snippet.content} />

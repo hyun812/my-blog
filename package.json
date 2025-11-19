@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run rss && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky",
-    "rss": "ts-node --project tsconfig.node.json src/scripts/rss.ts"
+    "prepare": "husky"
   },
   "lint-staged": {
     "**/*.{tsx,ts,jsx,js}": [
@@ -20,7 +19,6 @@
     "@next/third-parties": "^15.1.6",
     "@types/glob": "^8.1.0",
     "@types/lodash": "^4.17.14",
-    "feed": "^4.2.2",
     "glob": "^11.0.0",
     "gray-matter": "^4.0.3",
     "lodash": "^4.17.21",
