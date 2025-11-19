@@ -1,0 +1,211 @@
+---
+title: React.memo 올바르게 사용하기
+description: 얕은 비교와 React.memo의 관계를 이해하고, 성능 최적화를 위한 올바른 사용법을 알아보자
+category: react
+emoji: 💡
+tags:
+  - Frontend
+  - React
+  - Performance Optimization
+  - React.memo
+  - useCallback
+  - useMemo
+  - Rendering
+  - 성능최적화
+  - 메모이제이션
+  - 리렌더링
+
+date: '2025.11.17'
+fileName: 'react-memo'
+readingTime: 20
+---
+
+# 글을 시작하며
+
+React로 개발하다 보면 성능 최적화는 피할 수 없는 주제입니다. 특히 컴포넌트가 불필요하게 리렌더링되는 문제는 실제 사용자 경험에도 직접적인 영향을 주기 때문에, 많은 개발자가 `React.memo`, `useCallback`, `useMemo`를 자연스럽게 활용하고 있습니다.
+
+이번 글에서는 이러한 도구들이 실제로 어떻게 동작하는지, 언제 어떻게 사용해야 도움이 되는지에 대해 알아보고자 합니다.
+
+# 참조 타입과 얕은 비교
+
+## 참조 타입(Reference Type)의 특성
+
+`JavaScript`에서 객체, 배열, 함수와 같은 **참조 타입**(Reference Type)은 **값 자체가 아니라 메모리 주소로 비교**됩니다. 즉, 두 객체가 동일한 내용을 가지고 있더라도 서로 다른 메모리 주소를 가지면 다르다고 판단됩니다.
+
+```javascript
+const obj1 = { name: 'React' };
+const obj2 = { name: 'React' };
+
+console.log(obj1 === obj2); // false
+```
+
+위 예제에서 `obj1`과 `obj2`는 동일한 내용을 가지고 있지만, 서로 다른 메모리 주소를 가지기 때문에 `false`를 반환합니다.
+
+즉, "같은 참조 값인가?"는 "같은 메모리 주소를 가리키는가?"로 해석할 수 있습니다.
+
+## React에서의 얕은 비교
+
+**얕은 비교**는 객체, 배열, 함수와 같은 참조 타입들을 실제 내부 값까지 비교하지 않고, 동일한 참조인지(동일한 메모리 주소인지)만을 비교하는 것을 의미합니다.
+
+즉, 원시 타입(string, number 등)은 값이 같으면 같다고 판단하지만, 참조 타입은 참조 값(메모리 주소)이 같아야만 같다고 판단합니다.
+
+`React.memo`의 props 비교나 `useEffect`, `useCallback`, `useMemo` 등의 의존성 배열 값 비교에는 내부적으로 `Object.is()`기반의 얕은 비교를 수행합니다.
+
+즉, 아래와 같은 문제가 발생할 수 있습니다.
+
+1. **컴포넌트는 자신의 상태가 변경되거나 부모 컴포넌트가 리렌더링 될 때 다시 렌더링 됩니다.**
+2. **컴포넌트가 리렌더링 되면, 모든 지역 변수(객체와 함수 포함)는 새로운 참조로 다시 생성됩니다.**
+3. **이러한 새로운 참조가 props로 전달되거나 훅의 의존성 배열에 사용되면, 불필요한 리렌더링이나 이펙트 실행이 발생할 수 있습니다.**
+
+# useMemo와 useCallback
+
+이러한 문제 해결을 위해 렌더링 간의 동일한 참조를 유지해주는 `useMemo`와 `useCallback` 훅이 제공됩니다.
+
+`useMemo`와 `useCallback`은 주로 리렌더링이 반복될 때에도 참조의 안정성을 유지하기 위해 존재합니다. 이 훅들은 값을 캐싱하고, 의존성 배열이 변경될 때만 해당 값을 다시 계산합니다.
+
+주요 차이점은 `useCallback`은 함수 자체를 캐싱하고, `useMemo`는 전달받은 함수의 반환값을 캐싱한다는 점입니다.
+
+# React.memo의 동작
+
+`React.memo`는 컴포넌트를 메모이제이션(memoization)하여, 모든 props가 마지막 렌더링과 동일하면 렌더링을 건너뜁니다. 이때 props 비교는 **얕은 비교**를 사용합니다.
+
+```jsx
+const Child = React.memo(function Child({ name }) {
+  console.log('Child 렌더링');
+  return <div>{name}</div>;
+});
+```
+
+위와 같이 `Child` 컴포넌트를 `React.memo`로 감싸면, `name` prop이 변경되지 않는 한 `Child`는 다시 렌더링되지 않습니다.
+
+## 참조가 매번 변경되는 문제
+
+부모 컴포넌트가 리렌더링되면, 그 안에서 정의된 값들은 기본적으로 매번 새로 생성됩니다.
+
+```jsx
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // 메모이제이션이 없다면, 매 렌더링마다 새로운 참조를 가짐
+  const data = { name: '홍길동' };
+  const handleClick = () => {
+    console.log('클릭!');
+  };
+
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>증가</button>
+      <Child
+        data={data}
+        onClick={handleClick}
+      />
+    </div>
+  );
+}
+```
+
+위 예시에서 `Parent`가 렌더링될 때마다 `data`, `handleClick`이 새로 생성되므로, 참조값이 매번 변경됩니다.
+`Child`컴포넌트가 `React.memo`로 래핑되어 있더라도, 참조가 변경되기 때문에 리렌더링을 막지못합니다.
+
+따라서 아래와 같이 `useMemo`와 `useCallback`을 사용하여 참조를 유지해야 합니다.
+
+```jsx
+// 의존성이 변경되지 않으면 동일한 참조를 유지
+const data = useMemo(() => ({ name: '홍길동' }), []);
+const handleClick = useCallback(() => {
+  console.log('클릭!');
+}, []);
+```
+
+이제 `data`와 `handleClick`은 `Parent`가 리렌더링되더라도 동일한 참조를 유지하므로, `Child` 컴포넌트는 불필요하게 리렌더링되지 않습니다.
+
+## 예제 코드
+
+아래는 `useCallback`과 `React.memo`를 함께 사용하여 불필요한 리렌더링을 방지하는 예제입니다.
+
+```jsx
+const Child = React.memo(function Child({ onClick }) {
+  console.log('Child 렌더링');
+  return <button onClick={onClick}>클릭</button>;
+});
+
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = useCallback(() => {
+    console.log('클릭!');
+  }, []);
+
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>증가</button>
+      <Child onClick={handleClick} />
+    </div>
+  );
+}
+```
+
+이제 `Parent`의 count 상태가 변경되어 리렌더링되더라도:
+
+1. **`useCallback`이 동일한 함수 참조를 반환**
+2. **`React.memo`가 props 비교 시 동일한 참조임을 확인**
+3. **`Child` 컴포넌트는 리렌더링되지 않음**
+
+이렇게 참조 동등성을 유지하고 렌더링을 방지함으로써, 불필요한 자식 컴포넌트의 리렌더링을 효과적으로 방지할 수 있습니다.
+
+## 다른 대안: 컴포넌트 구조 개선
+
+메모이제이션을 적용하기 전에, 다른 방식으로 개선할 수 있는지 먼저 고려해보는 것이 좋습니다.
+
+```jsx
+const ParentWithState = () => {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <ExpensiveComponent /> {/* count가 변경될 때마다 리렌더링 됨 */}
+    </div>
+  );
+};
+```
+
+대신 상태를 분리하여 더 구체적인 컨테이너에 넣는 방식으로 개선할 수 있습니다.
+
+```jsx
+const CounterButton = () => {
+  const [count, setCount] = useState(0);
+
+  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
+};
+
+const Parent = () => {
+  return (
+    <div>
+      <CounterButton />
+      <ExpensiveComponent /> {/* count가 변경될 때 더 이상 리렌더링 되지 않음 */}
+    </div>
+  );
+};
+```
+
+이렇게 하면 `ExpensiveComponent`는 `count` 상태 변경과 무관하게 리렌더링되지 않으므로, 메모이제이션 없이도 성능을 개선할 수 있습니다.
+
+# 마치며
+
+리엑트에서 메모이제이션은 성능 최적화에 유용한 도구이지만, **무분별한 사용**은 비교 연산 비용, 메모리 사용량 증가 등으로 인해 오히려 **성능 저하**와 **코드 복잡성**을 초래할 수 있습니다.
+따라서 아래와 같은 점들을 유의해야 합니다.
+
+1. **실제 성능 병목 지점인지 확인**: 메모이제이션을 적용하기 전에, `React DevTools Profiler`를 사용하여 실제로 성능 문제가 발생하는지 확인합니다.
+2. **불필요한 메모이제이션 피하기**: 컴포넌트 구조를 재설계하면 메모이제이션이 필요 없을 수도 있습니다.
+3. **의존성 관리**: `useMemo`와 `useCallback`의 의존성 배열을 신중하게 관리하여, 필요한 경우에만 참조가 변경되도록 합니다.
+4. **최적화 검증**: 최적화가 실제로 성능을 개선하는지 반드시 검증합니다.
+
+함수형 프로그래밍 원칙에 따라 깔끔하게 컴포넌트를 합성하는 것부터 시작하고, 성능을 측정한 뒤, 메모이제이션이 정말 필요하다는 명확한 근거가 있을 때만 적용하세요.
+
+<br />
+
+**참고 자료**
+
+- [React 공식 문서 - React.memo](https://react.dev/reference/react/memo)
+- [React.memo Demystified: When It Helps and When It Hurts](https://cekrem.github.io/posts/react-memo-when-it-helps-when-it-hurts)
